@@ -1,0 +1,31 @@
+/* Slide text size: raise/lower the zoom factor. Only affects the slides view. */
+.reveal .slides section {
+  zoom: 1.0;
+}
+
+/* Slide number (built by slides_head.html): small green tag, bottom left */
+.slide-number {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 3px 10px;
+  background: #00883a;
+  color: #fff;
+  font-family: "DejaVu Sans", Helvetica, sans-serif;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  border-top-right-radius: 4px;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.slide-number[hidden] {
+  display: none;
+}
+
+/* Matplotlib figures from Python cells: centred horizontally */
+.reveal .slides section img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}

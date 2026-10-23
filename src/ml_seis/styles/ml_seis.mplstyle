@@ -1,0 +1,75 @@
+# ml_seis base style (light). Always load this first.
+#
+#   plt.style.use([base, axes_look])           light
+#   plt.style.use([base, dark, axes_look])     dark
+#
+# base      = ml_seis.mplstyle (this file)
+# dark      = ml_seis_dark.mplstyle   (colour overrides only)
+# axes_look = ml_seis_open.mplstyle | ml_seis_boxed.mplstyle  (structure only)
+#
+# Derived from dominik-strutz/dotfiles mystyle_background.mplstyle; sans font,
+# Okabe-Ito colours and slide-sized text. Colour tokens match the HTML artifacts
+# (see README.md in this folder). Keep both in sync.
+
+### COLOURS (tokens: bg #ffffff, ink #111111, ink2 #5c6370, grid #d9dde4)
+figure.facecolor    : ffffff
+axes.facecolor      : ffffff
+savefig.facecolor   : auto
+savefig.edgecolor   : auto
+text.color          : 111111
+axes.labelcolor     : 111111
+axes.edgecolor      : 5c6370
+xtick.color         : 5c6370
+ytick.color         : 5c6370
+xtick.labelcolor    : 111111
+ytick.labelcolor    : 111111
+grid.color          : d9dde4
+# Okabe-Ito: blue, vermillion, bluish green, orange, reddish purple, sky blue, grey
+axes.prop_cycle     : cycler('color', ['0072B2', 'D55E00', '009E73', 'E69F00', 'CC79A7', '56B4E9', '5c6370'])
+image.cmap          : viridis
+
+### FONTS
+font.family         : sans-serif
+font.sans-serif     : DejaVu Sans, Helvetica, Arial
+font.size           : 10
+mathtext.fontset    : cm
+axes.formatter.use_mathtext : True
+axes.formatter.limits       : -5, 5
+axes.formatter.useoffset    : False
+
+### LINES
+lines.linewidth         : 1.4
+lines.markersize        : 5.6
+lines.markeredgewidth   : 1.4
+patch.linewidth         : 0.8
+errorbar.capsize        : 3
+
+### AXES TEXT
+axes.titlesize      : 10
+axes.titleweight    : normal
+axes.titlepad       : 8
+axes.labelsize      : 10
+axes.labelweight    : normal
+xtick.labelsize     : 9
+ytick.labelsize     : 9
+
+### LEGEND (no box, transparent)
+legend.fontsize     : 9
+legend.frameon      : False
+legend.numpoints    : 1
+legend.scatterpoints: 1
+legend.borderaxespad: 1.0
+
+### FIGURE (wide slide row: 9.0 x 3.6 in at 120 dpi = 1080 x 432 px)
+figure.figsize      : 9.0, 3.6
+figure.dpi          : 120
+figure.titlesize    : 11
+figure.titleweight  : normal
+figure.constrained_layout.use : True
+
+### SAVING
+savefig.dpi         : 150
+savefig.format      : pdf
+savefig.bbox        : tight
+pdf.fonttype        : 42
+svg.fonttype        : none

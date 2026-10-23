@@ -1,0 +1,15 @@
+# ml_seis dark colour overrides. Load after ml_seis.mplstyle.
+# Tokens: bg #1b212c, ink #e6e9ef, ink2 #a0a9b8, grid #364052.
+
+figure.facecolor    : 1b212c
+axes.facecolor      : 1b212c
+text.color          : e6e9ef
+axes.labelcolor     : e6e9ef
+axes.edgecolor      : a0a9b8
+xtick.color         : a0a9b8
+ytick.color         : a0a9b8
+xtick.labelcolor    : e6e9ef
+ytick.labelcolor    : e6e9ef
+grid.color          : 364052
+# Okabe-Ito, brightened for dark: sky blue, orange-red, green, orange, pink, yellow, grey
+axes.prop_cycle     : cycler('color', ['56B4E9', 'FF8A4D', '3DDC97', 'E69F00', 'D98DB8', 'F0E442', 'a0a9b8'])

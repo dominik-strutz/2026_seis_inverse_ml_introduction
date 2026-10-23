@@ -1,0 +1,60 @@
+<script>
+  // Slides view only: slide counter and maths styling, injected into the page head.
+  (() => {
+    // Slide counter, inside .reveal so it survives fullscreen.
+    function updateSlideNumber() {
+      const reveal = document.querySelector(".reveal");
+      if (!reveal) return;
+      let number = reveal.querySelector(":scope > .slide-number");
+      if (!number) {
+        number = document.createElement("div");
+        number.className = "slide-number";
+        reveal.appendChild(number);
+      }
+      const slides = [...reveal.querySelectorAll(".slides section")].filter(
+        (s) => !s.querySelector("section")
+      );
+      const here = slides.findIndex((s) => s.classList.contains("present"));
+      number.hidden = here < 0;
+      number.textContent = here < 0 ? "" : `${here + 1} / ${slides.length}`;
+    }
+
+    // marimo renders each formula inside a <marimo-tex> shadow root, which page CSS
+    // cannot reach, so the maths style is adopted into each root.
+    const mathSheet = new CSSStyleSheet();
+    mathSheet.replaceSync(`
+      .katex { font-size: 1.2em; }
+      .katex-display > .katex { font-size: 1.3em; }
+      .katex .msupsub { -webkit-text-stroke: 0.25px currentColor; }
+      .katex .msupsub .katex-sizing.reset-size6.size3 { font-size: 0.85em; }
+      .katex .msupsub .katex-sizing.reset-size3.size1 { font-size: 0.8em; }
+    `);
+    function styleMath() {
+      document.querySelectorAll(".reveal marimo-tex").forEach((el) => {
+        const root = el.shadowRoot;
+        if (root && !root.adoptedStyleSheets.includes(mathSheet)) {
+          root.adoptedStyleSheets = [...root.adoptedStyleSheets, mathSheet];
+        }
+      });
+    }
+
+    // Re-run on DOM changes, batched to one call per frame.
+    let queued = false;
+    new MutationObserver(() => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        updateSlideNumber();
+        styleMath();
+        setTimeout(styleMath, 500); // shadow roots can attach after the mutation
+      });
+    }).observe(document.documentElement, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    updateSlideNumber();
+  })();
+</script>

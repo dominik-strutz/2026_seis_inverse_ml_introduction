@@ -1,0 +1,25 @@
+# ml_seis axes look "boxed": full frame, inward ticks on all sides, minor ticks, no grid.
+# For maps and dense figures (the dotfile look). Load after ml_seis.mplstyle
+# (and ml_seis_dark.mplstyle).
+
+axes.linewidth      : 1.0
+axes.grid           : False
+axes.axisbelow      : False
+grid.linewidth      : 0.8
+
+xtick.top           : True
+ytick.right         : True
+xtick.direction     : in
+ytick.direction     : in
+xtick.major.size    : 6
+ytick.major.size    : 6
+xtick.minor.size    : 3
+ytick.minor.size    : 3
+xtick.major.width   : 0.8
+ytick.major.width   : 0.8
+xtick.minor.width   : 0.4
+ytick.minor.width   : 0.4
+xtick.minor.visible : True
+ytick.minor.visible : True
+xtick.major.pad     : 5.6
+ytick.major.pad     : 5.6

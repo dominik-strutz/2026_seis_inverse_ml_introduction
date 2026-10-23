@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv
+.ruff_cache/
+.pytest_cache/
+.vscode/
+
+# marimo: caches and sessions stay local, except the session snapshots of the parts
+# published on molab (they give the static preview its outputs). Only synthetic-data
+# parts belong here: a snapshot embeds the outputs, so never add one that plots real data.
+**/__marimo__/*
+!**/__marimo__/session/
+**/__marimo__/session/*
+!lectures/__marimo__/session/1_a_locating_with_gradients.py.json
+!lectures/__marimo__/session/1_b_learning_the_inverse_map.py.json
+
+# Downloaded / cached datasets (fetched at runtime, never committed)
+data/
+
+# Agent files and working documents (plans, notes, scratch, skills) -- local only
+.agents/
+.claude/
+AGENTS.md
+CLAUDE.md
+# Style guides and contracts written for agents (the .mplstyle files stay: code)
+src/ml_seis/styles/README.md
+src/ml_seis/artifacts/STYLE.md
+src/ml_seis/artifacts/README.md
+
+# Instructor solutions -- keep the folder, never commit its contents
+solutions/*
+!solutions/.gitkeep
+
+# Personal lecture notes of the maintainer -- local only, not for agents
+notes/
