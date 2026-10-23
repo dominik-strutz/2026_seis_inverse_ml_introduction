@@ -10,7 +10,7 @@
 # ]
 #
 # [tool.uv.sources]
-# ml-seis = { git = "https://github.com/dominik-strutz/ml_seis" }
+# ml-seis = { git = "https://github.com/dominik-strutz/2026_seis_inverse_ml_introduction" }
 # torch = { index = "pytorch-cpu" }
 #
 # [[tool.uv.index]]

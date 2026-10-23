@@ -26,7 +26,7 @@ P/S picks from real waveforms.
 2. Get the code and the environment (Python 3.13 and CPU-only PyTorch are handled by uv):
 
    ```bash
-   git clone https://github.com/dominik-strutz/ml_seis.git
+   git clone https://github.com/dominik-strutz/2026_seis_inverse_ml_introduction.git ml_seis
    cd ml_seis
    uv sync
    ```
@@ -81,8 +81,8 @@ outputs; run it on molab's server to change the controls and train the networks.
 
 | Part | Open in molab |
 |---|---|
-| 1a Location by physics | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/ml_seis/blob/main/lectures/1_a_locating_with_gradients.py) |
-| 1b Learning the inverse map | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/ml_seis/blob/main/lectures/1_b_learning_the_inverse_map.py) |
+| 1a Location by physics | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/1_a_locating_with_gradients.py) |
+| 1b Learning the inverse map | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/1_b_learning_the_inverse_map.py) |
 
 Parts 1c and 2 are not on molab yet. The notebooks above run on their own: the
 `# /// script` header at the top of each one installs `ml_seis` from this repository,
