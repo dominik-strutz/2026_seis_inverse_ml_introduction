@@ -38,3 +38,27 @@ solutions/*
 
 # Personal lecture notes of the maintainer -- local only, not for agents
 notes/
+
+# Part 2 (waveforms): local only for now, not published
+lectures/2_a_filters_on_waveforms.py
+lectures/2_b_classifying_waveforms.py
+lectures/2_c_learning_without_labels.py
+lectures/2_d_picking_phases.py
+lectures/layouts/2_a_filters_on_waveforms.slides.json
+lectures/layouts/2_b_classifying_waveforms.slides.json
+lectures/layouts/2_c_learning_without_labels.slides.json
+lectures/layouts/2_d_picking_phases.slides.json
+src/ml_seis/artifacts/picking.html
+src/ml_seis/artifacts/unet_architecture.html
+src/ml_seis/artifacts/cnn_stack.html
+src/ml_seis/artifacts/cnn_architecture.html
+src/ml_seis/artifacts/softmax_loss.html
+src/ml_seis/convwidget.js
+src/ml_seis/convwidget.py
+src/ml_seis/llaimawidget.js
+src/ml_seis/llaimawidget.py
+src/ml_seis/waveform_data.py
+src/ml_seis/waveform_metrics.py
+src/ml_seis/waveform_plotting.py
+src/ml_seis/waveform_setup.py
+tests/test_waveform_plotting.py

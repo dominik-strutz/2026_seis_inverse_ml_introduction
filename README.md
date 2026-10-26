@@ -1,6 +1,6 @@
 # AI for inverse problems in seismology
 
-A two-lecture course in which machine learning is introduced as an inverse problem. Lectures and exercises are [marimo](https://marimo.io) notebooks written
+A course in which machine learning is introduced as an inverse problem. Lectures and exercises are [marimo](https://marimo.io) notebooks written
 mostly in plain [PyTorch](https://pytorch.org).
 
 | Part | Notebook | Theme |
@@ -8,17 +8,12 @@ mostly in plain [PyTorch](https://pytorch.org).
 | 1a | `lectures/1_a_locating_with_gradients.py` | Location by physics: forward model, misfit, autodiff, gradient descent |
 | 1b | `lectures/1_b_learning_the_inverse_map.py` | A network learns picks to location from simulated events |
 | 1c | `lectures/1_c_learning_a_posterior.py` | From a point to a distribution: mixture density networks, coverage |
-| 2a | `lectures/2_a_filters_on_waveforms.py` | Filters, feature maps, pooling, the receptive field |
-| 2b | `lectures/2_b_classifying_waveforms.py` | Training and judging a waveform classifier |
-| 2c | `lectures/2_c_learning_without_labels.py` | An autoencoder, its code, clusters named with a few labels |
-| 2d | `lectures/2_d_picking_phases.py` | A U-Net that picks P and S, and what its error means for location |
 
 The running problem is earthquake epicentre location in horizontal map coordinates
 (Southern California). The source parameters are `(m_x, m_y)`; origin time is removed
-by centring arrivals over stations. Part 1 uses P arrivals, and Part 2 learns
-P/S picks from real waveforms.
+by centring arrivals over stations. Part 1 uses P arrivals.
 
-> Status: Parts 1 (1a to 1c) and 2 (2a to 2d) are built. Homework is not written yet.
+> Status: Part 1 (1a to 1c) is published. Homework is not written yet.
 
 ## Quick start
 
@@ -35,7 +30,6 @@ P/S picks from real waveforms.
 
    ```bash
    uv run marimo edit lectures/1_a_locating_with_gradients.py   # edit / run
-   uv run marimo edit lectures/2_a_filters_on_waveforms.py
    ```
 
 Every notebook also declares its own dependencies (PEP 723), so you can run a single notebook in an isolated environment from the repo root:
@@ -58,7 +52,6 @@ The lecture notebooks are laid out as slides (`layouts/*.slides.json` and
 ```bash
 # Lecturing: read-only slides, code hidden (add --include-code to show it)
 uv run marimo run lectures/1_a_locating_with_gradients.py
-uv run marimo run lectures/2_a_filters_on_waveforms.py
 
 # Preparing: editor with the slide layout; pick "Slides" in the layout menu
 # (or open the app view) to preview, edit cells and re-run live
@@ -71,7 +64,6 @@ uv run marimo run --no-sandbox --watch lectures/1_a_locating_with_gradients.py
 
 Useful flags: `--headless` (do not open a browser), `--port 2718`, `--watch` (reload
 when the file changes). Slides advance with the arrow keys; `f` toggles full screen.
-The first run of Part 2 downloads its datasets (hundreds of MB) into `data/`.
 
 ## Browser (no install)
 
@@ -84,15 +76,14 @@ outputs; run it on molab's server to change the controls and train the networks.
 | 1a Location by physics | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/1_a_locating_with_gradients.py) |
 | 1b Learning the inverse map | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/1_b_learning_the_inverse_map.py) |
 
-Parts 1c and 2 are not on molab yet. The notebooks above run on their own: the
+Part 1c is not on molab yet. The notebooks above run on their own: the
 `# /// script` header at the top of each one installs `ml_seis` from this repository,
 so no other file is needed. The slide layout (`layouts/`, `lecture_slides.css`) only
 applies in a clone. molab has PyTorch preinstalled and an optional GPU, but only about
 1 GB of persistent storage, so datasets are downloaded at runtime.
 
 **Offline.** From a clone, everything in Parts 1a and 1b works without a network
-connection. The network is needed only for the first `uv sync` and, in Part 2, for the
-dataset downloads, which are cached in `data/` afterwards.
+connection. The network is needed only for the first `uv sync`.
 
 ## Contents
 
@@ -117,7 +108,6 @@ data/       downloaded and generated data (not in git)
 - Kingma, D. P., and Ba, J. (2015). Adam: a method for stochastic optimization. *ICLR*. arXiv:1412.6980
 - Ioffe, S., and Szegedy, C. (2015). Batch normalization: accelerating deep network training by reducing internal covariate shift. *ICML*. arXiv:1502.03167
 - Srivastava, N., Hinton, G., Krizhevsky, A., Sutskever, I., and Salakhutdinov, R. (2014). Dropout: a simple way to prevent neural networks from overfitting. *JMLR*, 15, 1929–1958.
-- Ronneberger, O., Fischer, P., and Brox, T. (2015). U-Net: convolutional networks for biomedical image segmentation. *MICCAI*. arXiv:1505.04597
 - Paszke, A., et al. (2019). PyTorch: an imperative style, high-performance deep learning library. *NeurIPS 32*. arXiv:1912.01703
 
 **Posteriors from networks** (Part 1c)
@@ -130,8 +120,6 @@ data/       downloaded and generated data (not in git)
 
 **Data**
 
-- Canário, J. P., Mello, R. F., Curilem, M., Huenupan, F., and Rios, R. A. (2020). Llaima volcano dataset: in-depth comparison of deep artificial neural network architectures on seismic events classification. *Data in Brief*, 30, 105627. Data: doi:10.17632/dv8nwdd36k.1 (CC BY-NC 3.0)
-- Zhu, W., et al. (2025). California earthquake dataset for machine learning and cloud computing (CEED). arXiv:2502.11500. Records from SCSN/SCEDC.
 - USGS ComCat earthquake catalogue (2019 Ridgecrest sequence), used for the `ridgecrest` prior: <https://earthquake.usgs.gov/fdsnws/event/1/>
 
 ## For contributors
