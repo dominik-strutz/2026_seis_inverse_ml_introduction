@@ -1,19 +1,26 @@
 # AI for inverse problems in seismology
 
-A course in which machine learning is introduced as an inverse problem. Lectures and exercises are [marimo](https://marimo.io) notebooks written
-mostly in plain [PyTorch](https://pytorch.org).
+A short introduction to some key machine learning concepts as part of a course on inverse problems for geophysicists. Slides are [marimo](https://marimo.io) notebooks written mostly in plain [PyTorch](https://pytorch.org), functioning as the slide set, the lecture notes and code examples in one.
 
-| Part | Notebook | Theme |
-|---|---|---|
-| 1a | `lectures/1_a_locating_with_gradients.py` | Location by physics: forward model, misfit, autodiff, gradient descent |
-| 1b | `lectures/1_b_learning_the_inverse_map.py` | A network learns picks to location from simulated events |
-| 1c | `lectures/1_c_learning_a_posterior.py` | From a point to a distribution: mixture density networks, coverage |
+| Part | Notebook | Theme | Browser |
+|---|---|---|---|
+| 1a | `lectures/1_a_locating_with_gradients.py` | Location by physics: forward model, misfit, autodiff, gradient descent | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/1_a_locating_with_gradients.py) |
+| 1b | `lectures/1_b_learning_the_inverse_map.py` | A network learns picks to location from simulated events | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/1_b_learning_the_inverse_map.py) |
+| 1c | `lectures/1_c_learning_a_posterior.py` | From a point to a distribution: mixture density networks | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/1_c_learning_a_posterior.py) |
 
-The running problem is earthquake epicentre location in horizontal map coordinates
-(Southern California). The source parameters are `(m_x, m_y)`; origin time is removed
-by centring arrivals over stations. Part 1 uses P arrivals.
-
-> Status: Part 1 (1a to 1c) is published. Homework is not written yet.
+> [!NOTE]
+> The slides rely heavily on interactive figures and playgrounds, and most of that
+> was written with the help LLms: the anywidget
+> playgrounds and the JavaScript that drives them, the standalone HTML figures
+> (HTML, SVG and JavaScript), and the slide layouts and styling.
+>
+> I tested the outputs extensively, and wherever possible the underlying logic
+> relies on transparent and concise PyTorch code. The large amount of HTML,
+>  CSS and JavaScrip for interactive layers themselfs has not been reviewed 
+> by me, I am neither qualified to review it, and it would take a lot of time.
+>
+> If anything seems off, please get in touch or
+> [open an issue](https://github.com/dominik-strutz/2026_seis_inverse_ml_introduction/issues).
 
 ## Quick start
 
@@ -38,7 +45,7 @@ Every notebook also declares its own dependencies (PEP 723), so you can run a si
 uvx marimo edit --sandbox lectures/1_a_locating_with_gradients.py
 ```
 
-(needs uv >= 0.7.21). Parts 1a and 1b install `ml_seis` from GitHub in this mode, so it
+(needs uv >= 0.7.21). Parts 1a to 1c install `ml_seis` from GitHub in this mode, so it
 needs a network connection. With a clone and `uv sync`, the `uv run marimo edit`
 commands above work offline and use your local copy of `src/ml_seis`.
 
@@ -62,29 +69,6 @@ uv run marimo edit lectures/1_a_locating_with_gradients.py
 uv run marimo run --no-sandbox --watch lectures/1_a_locating_with_gradients.py
 ```
 
-Useful flags: `--headless` (do not open a browser), `--port 2718`, `--watch` (reload
-when the file changes). Slides advance with the arrow keys; `f` toggles full screen.
-
-## Browser (no install)
-
-[molab](https://molab.marimo.io) runs a notebook from this repository in the browser,
-with nothing to install. A link opens a preview of the notebook with its saved
-outputs; run it on molab's server to change the controls and train the networks.
-
-| Part | Open in molab |
-|---|---|
-| 1a Location by physics | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/1_a_locating_with_gradients.py) |
-| 1b Learning the inverse map | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/1_b_learning_the_inverse_map.py) |
-
-Part 1c is not on molab yet. The notebooks above run on their own: the
-`# /// script` header at the top of each one installs `ml_seis` from this repository,
-so no other file is needed. The slide layout (`layouts/`, `lecture_slides.css`) only
-applies in a clone. molab has PyTorch preinstalled and an optional GPU, but only about
-1 GB of persistent storage, so datasets are downloaded at runtime.
-
-**Offline.** From a clone, everything in Parts 1a and 1b works without a network
-connection. The network is needed only for the first `uv sync`.
-
 ## Contents
 
 ```
@@ -97,39 +81,34 @@ data/       downloaded and generated data (not in git)
 
 ## References
 
-**Inverse theory** (notation and removing the origin time)
+**General**
 
-- Tarantola, A. (2005). *Inverse Problem Theory and Methods for Model Parameter Estimation*. SIAM.
+- Tarantola, A. (2005). *Inverse Problem Theory and Methods for Model Parameter Estimation*. SIAM. doi:10.1137/1.9780898717921 (also the notation of the course)
+- Murphy, K. P. (2022). *Probabilistic Machine Learning: An Introduction*. MIT Press. Free online: <https://probml.github.io/pml-book/book1.html>
+
+**Inverse theory** (origin-time removal; Part 1a)
+
 - Tarantola, A., and Valette, B. (1982). Inverse problems = quest for information. *Journal of Geophysics*, 50, 159–170.
 
-**Machine learning**
+**Gradients and optimisation** (Parts 1a, 1b)
 
-- Murphy, K. P. (2022). *Probabilistic Machine Learning: An Introduction*. MIT Press. Free online draft: <https://probml.github.io/pml-book/book1.html>
+- Rumelhart, D. E., Hinton, G. E., and Williams, R. J. (1986). Learning representations by back-propagating errors. *Nature*, 323, 533–536. doi:10.1038/323533a0
+- Polyak, B. T. (1964). Some methods of speeding up the convergence of iteration methods. *USSR Computational Mathematics and Mathematical Physics*, 4(5), 1–17. doi:10.1016/0041-5553(64)90137-5
 - Kingma, D. P., and Ba, J. (2015). Adam: a method for stochastic optimization. *ICLR*. arXiv:1412.6980
-- Ioffe, S., and Szegedy, C. (2015). Batch normalization: accelerating deep network training by reducing internal covariate shift. *ICML*. arXiv:1502.03167
-- Srivastava, N., Hinton, G., Krizhevsky, A., Sutskever, I., and Salakhutdinov, R. (2014). Dropout: a simple way to prevent neural networks from overfitting. *JMLR*, 15, 1929–1958.
-- Paszke, A., et al. (2019). PyTorch: an imperative style, high-performance deep learning library. *NeurIPS 32*. arXiv:1912.01703
 
 **Posteriors from networks** (Part 1c)
 
 - Bishop, C. M. (1994). Mixture density networks. Technical report NCRG/94/004, Aston University.
 - Meier, U., Curtis, A., and Trampert, J. (2007). Global crustal thickness from neural network inversion of surface wave data. *Geophysical Journal International*, 169, 706–722. doi:10.1111/j.1365-246X.2007.03373.x
-- Käufl, P., Valentine, A. P., O'Toole, T. B., and Trampert, J. (2014). A framework for fast probabilistic centroid-moment-tensor determination: inversion of regional static displacement measurements. *Geophysical Journal International*, 196.
-- Papamakarios, G., and Murray, I. (2016). Fast ε-free inference of simulation models with Bayesian conditional density estimation. *NeurIPS 29*. arXiv:1605.06376
-- Cranmer, K., Brehmer, J., and Louppe, G. (2020). The frontier of simulation-based inference. *PNAS*, 117(48), 30055–30062.
+- Käufl, P., Valentine, A. P., O'Toole, T. B., and Trampert, J. (2014). A framework for fast probabilistic centroid-moment-tensor determination: inversion of regional static displacement measurements. *Geophysical Journal International*, 196(3), 1676–1693. doi:10.1093/gji/ggt473
+- Zhao, X., and Curtis, A. (2024). Variational prior replacement in Bayesian inference and inversion. *Geophysical Journal International*, 239(2), 1236–1256. doi:10.1093/gji/ggae334 (combining a trained density with new information)
 
-**Data**
+**Software and data**
 
-- USGS ComCat earthquake catalogue (2019 Ridgecrest sequence), used for the `ridgecrest` prior: <https://earthquake.usgs.gov/fdsnws/event/1/>
-
-## For contributors
-
-Formatting and linting use ruff. Before sending changes:
-
-```bash
-uv run marimo check lectures homework solutions
-uv run ruff check . && uv run ruff format --check .
-```
+- Paszke, A., et al. (2019). PyTorch: an imperative style, high-performance deep learning library. *NeurIPS 32*. arXiv:1912.01703
+- Sethian, J. A. (1996). A fast marching level set method for monotonically advancing fronts. *PNAS*, 93(4), 1591–1595. doi:10.1073/pnas.93.4.1591 (travel times in the heterogeneous model, via [scikit-fmm](https://github.com/scikit-fmm/scikit-fmm))
+- [marimo](https://marimo.io) notebooks and [anywidget](https://anywidget.dev) widgets.
+- U.S. Geological Survey, ANSS Comprehensive Earthquake Catalog (ComCat), 2019 Ridgecrest sequence, used for the `ridgecrest` prior: <https://earthquake.usgs.gov/fdsnws/event/1/>
 
 ## License
 

@@ -26,6 +26,7 @@ const MAXK = 8;  // mixture components
 const COST = { point: 1, mixture: 2 };  // training time relative to point
 const NET_INK = "#8a3c00";  // contours of the network's posterior
 const EXACT_INK = "#00573f";  // contours of the exact posterior
+const R95 = Math.sqrt(5.991);  // 95 % of a 2D Gaussian: 2.45 sigma
 const VELOCITIES = [["homogeneous", "homogeneous"], ["heterogeneous", "heterogeneous"]];
 const FIELDS = [1, 2, 3, 4, 5, 6];
 const SIGMAS = [0.1, 0.2, 0.3, 0.5];
@@ -244,15 +245,14 @@ function render({ model, el }) {
       [field("test_prior", "TEST PRIOR", PRIOR_NAMES)]),
     panel("NETWORK",
       [uiField(uiLabel("HIDDEN LAYERS"), layerBox),
-        field("activation", "ACTIVATION", ACTS.map((a) => [a, a]), "φ")],
-      [widthsBox],
-      ...(showOutput ? [[uiField(uiLabel("OUTPUT"), ctl.output), kField]] : [])),
+        field("activation", "ACTIVATION", ACTS.map((a) => [a, a]), "φ"),
+        ...(showOutput ? [uiField(uiLabel("OUTPUT"), ctl.output), kField] : [])],
+      [widthsBox]),
     panel("TRAINING",
       [uiField(uiLabel("OPTIMISER"), ctl.optimiser),
         field("lr", "STEP SIZE", opts(LRS), "η"),
-        field("batch_size", "BATCH", BATCHES),
-        field("epochs", "EPOCHS", opts(EPOCHS))],
-      [toggles.normalise]));
+        field("batch_size", "BATCH", BATCHES)],
+      [field("epochs", "EPOCHS", opts(EPOCHS)), toggles.normalise]));
 
   // ---- the canvas and what sits on it -------------------------------------------------
   const body = elt("div");
@@ -817,7 +817,7 @@ function render({ model, el }) {
     const [mx, my] = toPx(post.mean);
     diamond(mx, my, 6, C.green);
   }
-  // the components of a mixture, each with its weight
+  // the components of a mixture: one 95 % ellipse each, with its weight
   function drawNetworkMarks(map, post) {
     if (!post || waitEvent || drag) return;
     const k = pxPerKm();
@@ -828,10 +828,10 @@ function render({ model, el }) {
       const ang = Math.atan2(l1 - sxx, sxy || 1e-12);
       const [cx, cy] = toPx(c.mean);
       ctx.save(); ctx.translate(cx, cy); ctx.rotate(-ang);
-      ctx.beginPath(); ctx.ellipse(0, 0, Math.sqrt(l1) * k, Math.sqrt(l2) * k, 0, 0, 7);
-      ctx.strokeStyle = C.ink; ctx.lineWidth = 1; ctx.setLineDash([3, 2]); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(0, 0, R95 * Math.sqrt(l1) * k, R95 * Math.sqrt(l2) * k, 0, 0, 7);
+      ctx.strokeStyle = NET_INK; ctx.lineWidth = 1.2; ctx.setLineDash([4, 3]); ctx.stroke();
       ctx.setLineDash([]); ctx.restore();
-      if (c.w >= 0.01) text(c.w.toFixed(2), cx + 6, cy - 6, "left", C.ink, 10, FONT, "", true);
+      if (c.w >= 0.01) text(c.w.toFixed(2), cx + 6, cy - 6, "left", NET_INK, 10, FONT, "", true);
     }
   }
   // the test event, the network's answer and the scatter over noise draws;

@@ -45,8 +45,10 @@ def test_simulate_picks_is_reproducible():
     xi = torch.tensor([10.0, 90.0, 40.0], dtype=torch.float64)
     m = torch.tensor(55.0, dtype=torch.float64)
     args = (m, m, xi, xi, 6.0, 0.1, 12.3)
-    a = physics.simulate_picks(*args, generator=torch.Generator().manual_seed(0))
-    b = physics.simulate_picks(*args, generator=torch.Generator().manual_seed(0))
+    torch.manual_seed(0)
+    a = physics.simulate_picks(*args)
+    torch.manual_seed(0)
+    b = physics.simulate_picks(*args)
     assert torch.equal(a, b)
     quiet = physics.simulate_picks(*args[:5], 0.0, 12.3)
     assert torch.allclose(quiet, 12.3 + physics.travel_times(m, m, xi, xi, 6.0))
@@ -66,7 +68,8 @@ def test_observe_mutes_stations_and_centres():
     def F(m_x, m_y):
         return physics.travel_times(m_x, m_y, xi, xi, 6.0)
 
-    d = physics.observe(F, m, 0.1, live, torch.Generator().manual_seed(0))
+    torch.manual_seed(0)
+    d = physics.observe(F, m, 0.1, live)
     assert d.shape == (2, 4)
     assert torch.all(d[:, 2] == 0)
     assert torch.allclose(d[:, live].mean(-1), torch.zeros(2, dtype=d.dtype))

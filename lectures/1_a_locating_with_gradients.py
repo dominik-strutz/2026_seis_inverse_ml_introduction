@@ -21,7 +21,7 @@
 
 import marimo
 
-__generated_with = "0.25.1"
+__generated_with = "0.25.2"
 app = marimo.App(
     width="full",
     layout_file="layouts/1_a_locating_with_gradients.slides.json",
@@ -30,7 +30,7 @@ app = marimo.App(
 )
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     import marimo as mo
     import torch
@@ -183,7 +183,7 @@ def _(mo):
     \langle d \rangle = \frac{1}{N}\sum_{j=1}^{N} d_j
     $$
 
-    We apply do the same to the simulated data
+    We do the same to the simulated data
 
     $$
     \tilde{F}_i(\mathbf{m})
@@ -216,8 +216,8 @@ def _(center, sigma, simulate_picks, torch, v_ref, xi_x, xi_y):
     m_x_true = torch.tensor(55.0, dtype=torch.float64)  # km
     m_y_true = torch.tensor(45.0, dtype=torch.float64)  # km
     t0 = 12.3  # s
-    generator = torch.Generator().manual_seed(0)  # for reproducibility
-    d_obs = simulate_picks(m_x_true, m_y_true, xi_x, xi_y, v_ref, sigma, t0, generator)
+    torch.manual_seed(0)  # for reproducibility
+    d_obs = simulate_picks(m_x_true, m_y_true, xi_x, xi_y, v_ref, sigma, t0)
     d_obs_c = center(d_obs)  # centred noisy observations
     return (d_obs_c,)
 
@@ -597,7 +597,7 @@ def _(d_obs_c, m_guess, misfit_custom, torch):
     grad_custom = torch.stack([m_x_c.grad, m_y_c.grad])
 
     print(f"S = {S_custom.item():.4f} s^2")
-    print(f"grad S = ({grad_custom[0]:.4f}, {grad_custom[1]:.4f}) s/km")
+    print(f"grad S = ({grad_custom[0]:.4f}, {grad_custom[1]:.4f}) s^2/km")
     return (grad_custom,)
 
 
@@ -691,13 +691,13 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(playground):
     editor = playground.make_editor()
     return (editor,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(editor, playground):
     # The scene as dragged on the map: stations, picks d_obs, forward model, start.
     problem, m_start = playground.read_scene(editor)
@@ -815,7 +815,7 @@ def _(try_it):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(editor, misfit, path, playground, problem):
     # send the run to the maps above; shows a warning if it went wrong
     playground.show_run(editor, problem, path, misfit)

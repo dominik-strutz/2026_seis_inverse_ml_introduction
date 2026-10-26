@@ -1,0 +1,12 @@
+# Install once with `make hooks`.
+repos:
+  - repo: local
+    hooks:
+      - id: snapshots
+        # the molab previews of the published parts must be regenerated (`make
+        # snapshots`) whenever a notebook or the ml_seis code it uses changes
+        name: molab snapshots are up to date
+        entry: uv run python scripts/snapshots.py check
+        language: system
+        pass_filenames: false
+        files: ^(lectures/[12]_[a-d]_.*\.py|src/ml_seis/|lectures/__marimo__/session/)

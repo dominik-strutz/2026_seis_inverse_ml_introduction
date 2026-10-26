@@ -30,7 +30,7 @@ app = marimo.App(
 )
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     from functools import partial
     from types import SimpleNamespace
@@ -90,12 +90,18 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # Part 1b: learning the inverse map
+def _(artifact, mo):
+    mo.vstack(
+        [
+            mo.md(r"""
+            # Part 1b: learning the inverse map
 
-    ### Machine learning and inversion for seismologists
-    """)
+            ### Machine learning and inversion for seismologists
+            """),
+            artifact("title_figure", width="65%"),
+        ],
+        gap=0,
+    )
     return
 
 
@@ -129,42 +135,40 @@ def _(mo):
 
     $$
     \mathbf{h}^{(\ell)} = \varphi\!\left(\mathbf{W}^{(\ell)}\,
-    \mathbf{h}^{(\ell-1)} + \mathbf{b}^{(\ell)}\right),
+    \mathbf{h}^{(\ell-1)} + \mathbf{b}^{(\ell)}\right)
     \qquad \ell = 1, \dots, L
     $$
 
     started at $\mathbf{h}^{(0)} = \tilde{\mathbf{d}}$ and ended by a linear
     layer, $\mathbf{m} = \mathbf{W}^{(L+1)} \mathbf{h}^{(L)} +
-    \mathbf{b}^{(L+1)}$. The entries of $\mathbf{W}$ and $\mathbf{b}$ are the
-    **parameters**; training adjusts them through stochastic gradient descent.
+    \mathbf{b}^{(L+1)}$.
+
+    The entries of $\mathbf{W}$ and $\mathbf{b}$ are trainable
+    **parameters**. Training adjusts them through stochastic gradient descent.
     """)
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(MLPStructure, mo, nn, torch):
     # a tiny example, 3 inputs and 2 outputs (m_x, m_y); the +/- buttons resize it
     torch.manual_seed(1)
     small_net = nn.Sequential(
         nn.Linear(3, 4), nn.ReLU(), nn.Linear(4, 4), nn.ReLU(), nn.Linear(4, 2)
     )
-    mo.vstack(
-        [
-            mo.Html('<div style="height: 2rem"></div>'),  # gap to the text above
-            mo.ui.anywidget(
-                MLPStructure.from_net(
-                    small_net,
-                    in_labels=["d\u0303_1", "d\u0303_2", "d\u0303_3"],
-                    out_labels=["m_x", "m_y"],
-                    editable=True,
-                )
-            ),
-        ]
-    )
+
+    mo.ui.anywidget(
+        MLPStructure.from_net(
+            small_net,
+            in_labels=["d\u0303_1", "d\u0303_2", "d\u0303_3"],
+            out_labels=["m_x", "m_y"],
+            editable=True,
+        )
+    ).style({"zoom": "0.7"})  # smaller on the slide
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(MLPPlayground, mo):
     mlp_playground = mo.ui.anywidget(MLPPlayground())
     runs = {}  # finished runs by settings: pressing train with old settings replays one
@@ -247,7 +251,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mlp_playground, recorder):
     mlp_playground.show_run(recorder)  # the playground above plays it back
     return
@@ -314,13 +318,11 @@ def _(mo):
     mo.md(r"""
     ## What the curve fit showed
 
-    - **Flexibility.** Width and depth set how wiggly a curve the network can draw.
-    - **Held-out points.** The error on fitted points only falls; points the network was
-      not fitted to show whether the fit carries over.
-    - **Data.** With more points, the two errors move together.
+    - **Flexibility.** Networks can fit complex curves from basic components.
+    - **Overfitting.** Networks can fit the noise in their training points.
 
-    Now there is no curve to draw: the network takes the arrival times at $N$ stations
-    and returns the epicentre. Its examples come from a simulator.
+    In the next example the network takes the arrival times at $N$ stations and
+    returns 2 values (the epicentre). Data is generated synthetically.
     """)
     return
 
@@ -330,26 +332,29 @@ def _(mo):
     mo.md(r"""
     ## The prior: where we expect events
 
-    For earthquakes there is no curve to draw: the examples come from simulation, so we
-    must decide **where earthquakes happen**. The distribution we draw sources from is
-    our **prior** $\rho_M(\mathbf{m})$: where we expect events *before* seeing any
-    arrival times.
+    To fit a neural network the data can either be collected from real events or,
+    if we understand the system sufficiently well, be generated synthetically.
+    Since ground truth locations for earthquakes are hard to come by and seismic
+    wave propagation is well understood, we will generate our dataset here
+    synthetically. But we need to be fully aware that this is always a (big)
+    simplification.
 
-    The `uniform` prior puts events anywhere on the map. The `ridgecrest` prior is
-    inspired by the 2019 Ridgecrest aftershocks: a long NW–SE rupture, a shorter NE–SW
-    arm and a northern cluster over a weak background.
+    Where we expect events *before* seeing any arrival times is described by the
+    **prior distribution** $\rho_M(\mathbf{m})$.
+    * The `uniform` prior puts events anywhere on the map
+    * The `ridgecrest` prior is inspired by the 2019 Ridgecrest aftershocks
     """)
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(make_stations, prior_figure, sample_prior, torch):
-    _generator = torch.Generator().manual_seed(0)
+    torch.manual_seed(0)
     prior_figure(
         "uniform",
         "ridgecrest",
-        sample_prior("uniform", 1000, _generator),
-        sample_prior("ridgecrest", 1000, _generator),
+        sample_prior("uniform", 1000),
+        sample_prior("ridgecrest", 1000),
         *make_stations(5),  # the 5 stations the locator playground opens with
         titles=("uniform prior: 1000 events", "ridgecrest prior: 1000 events"),
     )
@@ -361,9 +366,8 @@ def _(mo):
     mo.md(r"""
     ## From a source to a training pair
 
-    Draw a source from the prior, then simulate the picks it would produce: noisy and
-    centred over the stations, exactly as in 1a.
-
+    To generate synthetic data, draw a source from the prior, then simulate the
+    noisy centered picks it would produce:
     $$
     \mathbf{m} \sim \rho_M
     \qquad
@@ -371,13 +375,14 @@ def _(mo):
     \mathbf{C}\,\big(\mathbf{F}(\mathbf{m}) + \boldsymbol{\varepsilon}\big)
     $$
 
-    The pair $(\tilde{\mathbf{d}}, \mathbf{m})$ is one example: the input the network
-    sees and the answer it should give. The simulator makes as many as we ask for.
+    The data set we use to train the network is a long list of pairs
+    $(\tilde{\mathbf{d}}, \mathbf{m})$. Here we have the luxury that the simulator
+    can make as many as we want.
     """)
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(default_config, default_scene, lp):
     lp.dataset_figure(default_scene, "uniform", n_events=default_config["n_train"])
     return
@@ -411,13 +416,13 @@ def _(physics, sample_prior, scene_from, torch):
     def make_dataset(config):
         """Training and validation events for the scene captured by "train"."""
         scene = scene_from(config)  # stations, forward operator F, sigma
-        gen_train = torch.Generator().manual_seed(0)  # the same events every time
-        # validation has its own stream, so it does not change with n_train
-        gen_val = torch.Generator().manual_seed(1)
-        m_train = sample_prior(config["train_prior"], config["n_train"], gen_train)
-        m_val = sample_prior(config["train_prior"], N_VAL, gen_val)
-        d_train = physics.observe(scene.F, m_train, scene.sigma, scene.live, gen_train)
-        d_val = physics.observe(scene.F, m_val, scene.sigma, scene.live, gen_val)
+        torch.manual_seed(0)  # the same events every time
+        m_train = sample_prior(config["train_prior"], config["n_train"])
+        d_train = physics.observe(scene.F, m_train, scene.sigma, scene.live)
+        # validation has its own seed, so it does not change with n_train
+        torch.manual_seed(1)
+        m_val = sample_prior(config["train_prior"], N_VAL)
+        d_val = physics.observe(scene.F, m_val, scene.sigma, scene.live)
         return scene, m_train, d_train, m_val, d_val
 
     return N_VAL, make_dataset
@@ -428,21 +433,18 @@ def _(mo):
     mo.md(r"""
     ## Train, validation, test
 
-    A network that fits its training events may still fail on new ones, so the events
-    are split into three sets with different jobs.
+    A network that fits its training events does not necessarily generalise to unseen
+    events. To test this, the dataset is split into three sets with different jobs.
 
-    - **Train**: the network is fitted to these and to nothing else.
-    - **Validation**: held back during training. It shows when the network starts to
-      memorise, and we use it to choose its size or when to stop.
-    - **Test**: touched once, at the end, for an honest estimate on events the network
-      has never seen.
-
-    The held-out points of the curve fit played the role of validation points.
+    - **Train**: the network is fitted to these and to nothing else
+    - **Validation**: held back during training, used to adapt training process
+    - **Test**: used once, at the end, for an honest estimate on events the network
+      has never seen
     """)
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(N_TEST, N_VAL, default_config, default_scene, lp):
     lp.split_figure(default_scene, (default_config["n_train"], N_VAL, N_TEST))
     return
@@ -451,45 +453,10 @@ def _(N_TEST, N_VAL, default_config, default_scene, lp):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## New events from somewhere else
-
-    - A test is fair only if its events come from the same process as the training
-      events.
-    - Generalisation is always relative to a distribution.
-    - Where no training event ever fell, nothing told the network what to answer.
-    """)
-    return
-
-
-@app.cell
-def _(
-    N_TEST,
-    default_config,
-    default_scene,
-    prior_figure,
-    sample_prior,
-    torch,
-):
-    _generator = torch.Generator().manual_seed(0)
-    prior_figure(
-        "ridgecrest",
-        "uniform",
-        sample_prior("ridgecrest", default_config["n_train"], _generator),
-        sample_prior("uniform", N_TEST, _generator),
-        default_scene.xi_x,
-        default_scene.xi_y,
-        titles=("training events", "new events"),
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
     ## Picks in, location out
 
-    The network is the multilayer perceptron of the curve fit, with one input per
-    station and two outputs, the epicentre:
+    The default network is a multilayer perceptron, with one input per station and
+    two outputs, the epicentre:
 
     $$
     \hat{\mathbf{m}} = f\big(\tilde{\mathbf{d}}\big)
@@ -500,7 +467,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mlp_structure_figure, nn, torch):
     # the playground's opening network: 5 picks in, two hidden layers, (m_x, m_y) out
     torch.manual_seed(0)  # the same random initial weights every time
@@ -523,9 +490,10 @@ def _(mo):
     mo.md(r"""
     ## Put numbers on one scale
 
-    Weights start at order one, so a network learns best when its inputs and outputs are
-    of order one too. Picks are seconds, locations tens of kilometres. Both are shifted
-    and divided by their standard deviation,
+    * Network weights start at order one, so a network learns best when its inputs
+      and outputs are of order one too.
+    * Picks are seconds, locations tens of kilometres. Both are shifted
+    and divided by their standard deviation
 
     $$
     \tilde{\mathbf{d}} \mapsto
@@ -535,8 +503,8 @@ def _(mo):
     \frac{\mathbf{m} - \mathrm{mean}(\mathbf{m})}{\mathrm{std}(\mathbf{m})}
     $$
 
-    with the mean and standard deviation of the **training** events only: validation and
-    test events must be treated exactly like new data.
+    with the mean and standard deviation of the **training** events only.
+    Validation and test events must be treated exactly like new data.
     """)
     return
 
@@ -565,7 +533,7 @@ def _(torch):
     return (Scaling,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(Scaling, default_config, lp, make_dataset):
     _, _m, _d, _, _ = make_dataset(default_config)
     _scaling = Scaling(_d, _m)
@@ -578,8 +546,8 @@ def _(mo):
     mo.md(r"""
     ## What the network is trained on
 
-    Gradient descent as in 1a, with new unknowns: the weights and biases
-    $\mathbf{W}, \mathbf{b}$ replace the location $\mathbf{m}$. The misfit is the mean
+    Gradient descent with unknown weights and biases
+    $\mathbf{W}, \mathbf{b}$. The misfit is the mean
     squared error of the network's answer, in the scaled units,
 
     $$
@@ -603,17 +571,21 @@ def _(mo):
     mo.md(r"""
     ## Epochs and mini-batches
 
-    - A step after all events would be slow.
-    - So the events are shuffled and cut into **mini-batches**: one batch, one step.
-    - One pass through all events is an **epoch**, with a new shuffle each time.
+    A step after all events would be slow. To avoid this, events are shuffled and
+    cut into **mini-batches**: one batch, one step. One pass through all events is
+    an **epoch**, with a new shuffle each time.
+
     - Small batches: noisy steps that can shake the weights out of a poor local
       minimum.
-    - One big batch: the exact gradient, straight into the nearest minimum.
+    - Larger batches: less noisy gradient, still cheaper (memory and compute) than
+      all at once
+    - One batch: the exact gradient, straight into the nearest minimum, expensive
+      per step
     """)
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(artifact):
     artifact("minibatch_epoch", width="100%")
     return
@@ -714,10 +686,10 @@ def _(mo):
     ## The best possible locator
 
     - The data say how likely each location is: the **likelihood**.
-    - Combined with the **prior**, it gives the **posterior**: the full answer for one
-      event.
-    - Under a squared error the best single answer is the **posterior mean**.
-    - No network trained this way beats their average error: a floor.
+    - Combined with the **prior**, it gives the **posterior**: the full
+      probabilistic answer for one event.
+    - Under a squared error the best single answer is the **posterior mean**, no
+      network can beat this
     - The floor is not zero, because the picks are noisy.
 
     The figure uses noisier picks than usual, so that the prior can be seen.
@@ -725,7 +697,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(default_scene, lp):
     lp.posterior_figure(default_scene, "ridgecrest", sigma=1.0)  # noisier: prior shows
     return
@@ -741,9 +713,9 @@ def _(mo, physics, posterior_rms, sample_prior, scene_from, torch):
         locator trained with MSE can do on average. The validation events are too
         few (a handful of bad misses move the RMS by a km), so it uses its own."""
         scene = scene_from(config)
-        gen = torch.Generator().manual_seed(2)  # not the training or validation events
-        m = sample_prior(config["train_prior"], 10_000, gen)
-        d = physics.observe(scene.F, m, scene.sigma, scene.live, gen)
+        torch.manual_seed(2)  # not the training or validation events
+        m = sample_prior(config["train_prior"], 10_000)
+        d = physics.observe(scene.F, m, scene.sigma, scene.live)
         return posterior_rms(
             scene.F, d, m, scene.sigma, config["train_prior"], scene.live
         )
@@ -754,22 +726,20 @@ def _(mo, physics, posterior_rms, sample_prior, scene_from, torch):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## Reading the learning curves
+    ## Reading learning curves
 
-    The playground draws the error of the network in km after every epoch, with the
-    floor dashed. Three kinds of run, one example each:
+    There are generally three kinds of behaviour you can see in learning curves:
 
-    - **Underfit** (a linear map of the picks): both errors stay high, well above
+    - **Underfit**: both errors stay high, well above
       the floor. The network is too simple.
     - **A good fit**: both errors fall and level off a little above the floor.
-    - **Overfit** (far more freedom than events): the training error keeps falling
-      while the validation error turns up. ▼ marks the lowest validation error: the
-      epoch to stop at.
+    - **Overfit**: the training error keeps falling
+      while the validation error turns up.
     """)
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(data_keys, default_config, error_floor, lp, mo, train):
     _cases = [
         ("underfit: no hidden layer", default_config | {"widths": []}),
@@ -803,18 +773,19 @@ def _(mo):
 
     - **The prior**: events where the training prior put none.
     - **The physics**: a P-speed model other than the one that made the training picks.
-    - **The stations**: one moved or died, so the same input now means something else.
+    - **The stations**: one moved or had a failure, so the same input now means
+      something else.
     """)
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(LocatorPlayground, mo):
     locator_playground = mo.ui.anywidget(LocatorPlayground())
     return (locator_playground,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(data_keys, error_floor, locator_playground, train):
     config = locator_playground.train_config()  # what the last press captured
     run = train(config)  # cached: the same config never trains twice
@@ -835,23 +806,7 @@ def _(run, torch):
 
 @app.cell(hide_code=True)
 def _(locator_playground, mo):
-    mo.vstack(
-        [
-            locator_playground,
-            mo.md(r"""
-    ### Five things to look for
-
-    Change one thing at a time and watch the curves and the maps.
-
-    - **Capacity.** What separates a network that is too simple from one that is too
-      flexible?
-    - **Data.** How many events does a network need before it carries over to new ones?
-    - **Preparation.** What goes wrong when the numbers or the steps are badly scaled?
-    - **The floor.** How well can any locator do when the picks are noisy?
-    - **Shift.** What happens when the data come from a world the network never saw?
-        """),
-        ]
-    )
+    mo.vstack([locator_playground])
     return
 
 
@@ -886,12 +841,6 @@ def _(mo):
     *data* but not the network. The posterior keeps the P speed and $\sigma$ of the
     training (dashed rays), while the data follow the new scene (solid).
     """)
-    return
-
-
-@app.cell
-def _(locator_playground, run):
-    locator_playground.network_figure(run.net)  # the network you chose, as drawn
     return
 
 
@@ -979,21 +928,6 @@ def _(try_it):
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## When the data allow two answers
-
-    - Stations on a line: an event and its mirror image give almost the same picks.
-    - The posterior has two lobes, one on each side of the line.
-    - A network trained with squared error returns one point, close to the posterior
-      mean: **between** the lobes, where no event is likely.
-    - MSE asks for the mean. One point is the wrong kind of output.
-    - Next: what should a network return instead?
-    """)
-    return
-
-
-@app.cell
 def _(floor, locate, locator_playground, observe, run):
     # replay the run on the scene as it is now and send it to the playground above
     locator_playground.show(run, floor, locate, observe)

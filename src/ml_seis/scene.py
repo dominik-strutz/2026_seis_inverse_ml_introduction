@@ -56,10 +56,10 @@ def scene_from(config: dict) -> Scene:
     )
 
 
-def observe(scene: Scene, m, generator) -> torch.Tensor:
+def observe(scene: Scene, m) -> torch.Tensor:
     """Centred noisy picks at the scene's stations for sources ``m`` of shape (n, 2):
     ``physics.observe`` with the scene's operator, noise level and working stations."""
-    return physics.observe(scene.F, m, scene.sigma, scene.live, generator)
+    return physics.observe(scene.F, m, scene.sigma, scene.live)
 
 
 def centred_arrivals(scene: Scene, m) -> torch.Tensor:

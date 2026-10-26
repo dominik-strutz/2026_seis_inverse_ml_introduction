@@ -92,14 +92,6 @@
         "showCode": false
       },
       {
-        "type": "fragment",
-        "showCode": false
-      },
-      {
-        "type": "slide",
-        "showCode": false
-      },
-      {
         "type": "skip"
       },
       {
@@ -161,15 +153,7 @@
         "type": "skip"
       },
       {
-        "type": "slide",
-        "showCode": false
-      },
-      {
         "type": "skip"
-      },
-      {
-        "type": "slide",
-        "showCode": false
       },
       {
         "type": "skip"

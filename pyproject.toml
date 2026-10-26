@@ -1,7 +1,7 @@
 [project]
 name = "ml-seis"
 version = "0.1.0"
-description = "Two-lecture short course on machine learning and inversion for seismologists (marimo notebooks, PyTorch)."
+description = "Course on machine learning and inversion for seismologists (marimo notebooks, PyTorch)."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]

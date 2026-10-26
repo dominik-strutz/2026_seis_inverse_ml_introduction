@@ -40,21 +40,20 @@ def center(d):
     return d - d.mean(-1, keepdim=True)
 
 
-def simulate_picks(m_x, m_y, xi_x, xi_y, v_ref, sigma, t0, generator=None):
+def simulate_picks(m_x, m_y, xi_x, xi_y, v_ref, sigma, t0):
     """Noisy P arrival times d_obs = t0 + F(m) + eps with eps ~ N(0, sigma^2).
 
     m_x, m_y, xi_x, xi_y, v_ref: as in ``travel_times``
     sigma: standard deviation of a pick (s)
     t0: origin time (s), unknown to the inversion
-    generator: optional torch.Generator, for reproducible noise
     returns: arrival times (s), shape (..., N)
     """
     F = travel_times(m_x, m_y, xi_x, xi_y, v_ref)
-    eps = sigma * torch.randn(F.shape, dtype=F.dtype, generator=generator)
+    eps = sigma * torch.randn(F.shape, dtype=F.dtype)
     return t0 + F + eps
 
 
-def observe(F, m, sigma, live, generator=None):
+def observe(F, m, sigma, live):
     """Centred noisy picks d~ = C (F(m) + eps): what the locator network sees.
 
     F: forward operator, F(m_x, m_y) -> travel times (s), shape (n, N)
@@ -62,10 +61,9 @@ def observe(F, m, sigma, live, generator=None):
     sigma: standard deviation of a pick (s)
     live: which stations work, bool, shape (N,); a muted station is left out of the
         mean and reads 0
-    generator: optional torch.Generator, for reproducible noise
     returns: centred picks (s), shape (n, N)
     """
     F_m = F(m[:, 0], m[:, 1])
-    d = F_m + sigma * torch.randn(F_m.shape, dtype=F_m.dtype, generator=generator)
+    d = F_m + sigma * torch.randn(F_m.shape, dtype=F_m.dtype)
     d_c = d - d[:, live].mean(-1, keepdim=True)
     return d_c * live

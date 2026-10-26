@@ -18,6 +18,8 @@ wheels/
 **/__marimo__/session/*
 !lectures/__marimo__/session/1_a_locating_with_gradients.py.json
 !lectures/__marimo__/session/1_b_learning_the_inverse_map.py.json
+!lectures/__marimo__/session/1_c_learning_a_posterior.py.json
+!lectures/__marimo__/session/snapshots.json
 
 # Downloaded / cached datasets (fetched at runtime, never committed)
 data/

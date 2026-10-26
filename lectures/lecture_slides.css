@@ -1,6 +1,11 @@
 /* Slide text size: raise/lower the zoom factor. Only affects the slides view. */
 .reveal .slides section {
-  zoom: 1.0;
+  zoom: 0.9;
+}
+
+/* Playgrounds: a touch smaller than the slide text (an inline zoom on one wins) */
+.reveal marimo-anywidget {
+  zoom: 0.93;
 }
 
 /* Slide number (built by slides_head.html): small green tag, bottom left */
@@ -28,4 +33,11 @@
   display: block;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* Notebook view: marimo caps a cell output at 610px and scrolls it. Show the
+   full output instead and let the page scroll; slides have no such cap. */
+.marimo-cell.interactive .output-area,
+.marimo-cell.interactive .console-output-area {
+  max-height: none;
 }

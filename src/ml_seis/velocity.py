@@ -39,8 +39,8 @@ def unit_field(seed: int, grid: int = _GRID) -> torch.Tensor:
     """Gaussian random field with zero mean and unit variance, shape (grid, grid)."""
     if (seed, grid) not in _FIELDS:
         n = 2 * grid  # padded, so the periodic FFT does not wrap the map onto itself
-        gen = torch.Generator().manual_seed(1000 + seed)
-        white = torch.randn(n, n, generator=gen, dtype=torch.float64)
+        torch.manual_seed(1000 + seed)
+        white = torch.randn(n, n, dtype=torch.float64)
         k = torch.fft.fftfreq(n, d=BOX / (grid - 1), dtype=torch.float64) * 2 * np.pi
         k2 = k[:, None] ** 2 + k[None, :] ** 2
         amplitude = torch.exp(-k2 * CORRELATION**2 / 8)  # sqrt of a Gaussian spectrum

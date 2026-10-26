@@ -1,9 +1,9 @@
 """Where we expect earthquakes: prior densities on the map, and samples from them.
 
-Both priors live on the same square map (km) and are restricted to the box
-``[MARGIN, BOX - MARGIN]``.
+All priors live on the same square map (km). ``uniform`` covers the whole map; the
+catalogue-based ones are restricted to the box ``[MARGIN, BOX - MARGIN]``.
 
-``uniform``    every position is equally likely.
+``uniform``    every position on the map is equally likely.
 ``ridgecrest`` the 2019 Ridgecrest aftershock catalogue (USGS ComCat, M >= 1.5,
                4 Jul - 4 Aug 2019): events counted on a 2 km grid, one Gaussian kernel
                per cell weighted by its share of the events, truncated to the box and
@@ -48,8 +48,14 @@ def _background(name: str, fitted: float) -> float:
     return 0.0 if name == "ridgecrest_faults" else fitted
 
 
-def _inside(m_x, m_y):
-    lo, hi = MARGIN, BOX - MARGIN
+def _margin(name: str) -> float:
+    """The uniform prior covers the whole map; the catalogue-based ones keep events
+    ``MARGIN`` away from the edge, where the kernel weights were fitted."""
+    return 0.0 if name == "uniform" else MARGIN
+
+
+def _inside(m_x, m_y, margin: float = MARGIN):
+    lo, hi = margin, BOX - margin
     return (m_x >= lo) & (m_x <= hi) & (m_y >= lo) & (m_y <= hi)
 
 
@@ -88,7 +94,8 @@ def log_prior(name: str, m_x, m_y) -> torch.Tensor:
     m_x, m_y = torch.broadcast_tensors(
         *(torch.as_tensor(a, dtype=torch.float64) for a in (m_x, m_y))
     )
-    log_uniform = -2 * math.log(BOX - 2 * MARGIN)
+    margin = _margin(name)
+    log_uniform = -2 * math.log(BOX - 2 * margin)
     if name == "uniform":
         logp = torch.full_like(m_x, log_uniform)
     else:
@@ -107,14 +114,16 @@ def log_prior(name: str, m_x, m_y) -> torch.Tensor:
                 logp,
                 torch.tensor(math.log(background) + log_uniform, dtype=torch.float64),
             )
-    return torch.where(_inside(m_x, m_y), logp, torch.full_like(logp, -math.inf))
+    return torch.where(
+        _inside(m_x, m_y, margin), logp, torch.full_like(logp, -math.inf)
+    )
 
 
-def sample_prior(name: str, n: int, generator: torch.Generator | None = None):
+def sample_prior(name: str, n: int):
     """Draw ``n`` source positions from a prior: a tensor of shape (n, 2) in km."""
     _check(name)
-    lo, hi = MARGIN, BOX - MARGIN
-    kwargs = {"generator": generator, "dtype": torch.float64}
+    lo, hi = _margin(name), BOX - _margin(name)
+    kwargs = {"dtype": torch.float64}
     if name == "uniform":
         return lo + (hi - lo) * torch.rand(n, 2, **kwargs)
 
@@ -123,9 +132,7 @@ def sample_prior(name: str, n: int, generator: torch.Generator | None = None):
     n_mix = int((~is_background).sum())
     mix = torch.empty(0, 2, dtype=torch.float64)
     while len(mix) < n_mix:  # rejection truncates the kernel mixture to the box
-        k = torch.multinomial(
-            log_w.exp(), 2 * n_mix, replacement=True, generator=generator
-        )
+        k = torch.multinomial(log_w.exp(), 2 * n_mix, replacement=True)
         pts = centres[k] + h * torch.randn(2 * n_mix, 2, **kwargs)
         mix = torch.cat([mix, pts[_inside(pts[:, 0], pts[:, 1])]])
     out = lo + (hi - lo) * torch.rand(n, 2, **kwargs)  # background positions

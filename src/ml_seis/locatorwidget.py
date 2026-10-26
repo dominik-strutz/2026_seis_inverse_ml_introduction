@@ -354,7 +354,7 @@ class LocatorPlayground(anywidget.AnyWidget):
         ``run`` has ``net``, ``recorder``, ``config`` and ``m_train``; ``floor`` is
         the RMS error of the posterior mean (km); ``locate(d)`` maps centred picks
         (n, N) to sources (n, 2) with the network's current weights; and
-        ``observe(scene, m, generator)`` simulates centred noisy picks. For a
+        ``observe(scene, m)`` simulates centred noisy picks. For a
         mixture output, ``posterior_of(d)`` returns the network's posterior in km
         (a torch distribution with batch shape (n,)). Only the parts whose inputs
         changed are recomputed and sent.
@@ -420,9 +420,9 @@ class LocatorPlayground(anywidget.AnyWidget):
                 f"{now.n_stations} stations: press train."
             )
             return view
-        gen = torch.Generator().manual_seed(1)
-        m_test = sample_prior(self.test_prior, N_TEST, gen)
-        d_test = observe(now, m_test, gen)
+        torch.manual_seed(1)
+        m_test = sample_prior(self.test_prior, N_TEST)
+        d_test = observe(now, m_test)
         m_grid = torch.cartesian_prod(GRID_NODES, GRID_NODES).flip(1)  # x runs fastest
         tic = time.perf_counter()
         locate(d_test)
@@ -443,9 +443,8 @@ class LocatorPlayground(anywidget.AnyWidget):
         answers for noise draws of its picks (the first draw is the observed one)."""
         config = run.config
         m_event = torch.tensor(self.test_event, dtype=torch.float64)
-        d_event = observe(
-            now, m_event.expand(N_DRAWS, 2), torch.Generator().manual_seed(2)
-        )
+        torch.manual_seed(2)
+        d_event = observe(now, m_event.expand(N_DRAWS, 2))
         args = (assumed.F, d_event[0], assumed.sigma)
         posterior = grid_posterior(*args, config["train_prior"], assumed.live, n=N_POST)
         likelihood = grid_posterior(*args, None, assumed.live, n=N_POST)
@@ -499,10 +498,11 @@ class LocatorPlayground(anywidget.AnyWidget):
                 torch.manual_seed(0)  # as in the notebook's training
                 net = nn.Sequential(*(_fresh(m) for m in net))
             png = _png_bytes(
-                _structure_figure(net, trained, self.n_train, self.n_components)
+                _structure_figure(net, trained, self.n_train, self.n_components),
+                dpi=240,  # shown at half the pixels: crisp
             )
             self._figures = {**dict(list(self._figures.items())[-7:]), key: png}
-        return mo.image(self._figures[key])
+        return mo.image(self._figures[key], width=560)
 
 
 def _shape(net):

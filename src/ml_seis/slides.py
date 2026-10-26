@@ -5,7 +5,8 @@ Slide figures (``artifact``) follow one contract, so a figure never sizes itself
 * The artifact file has a ``#stage`` element of a fixed logical size and says so in
   ``<meta name="artifact-size" content="1100x440">``.
 * The helper puts the iframe in a *slot*. In slides the slot takes all the room left
-  under the text; elsewhere it has the aspect ratio of the stage.
+  under the text; elsewhere it has the aspect ratio of the stage and never more than
+  a notebook cell shows without scrolling.
 * A small script injected into the iframe scales ``#stage`` to the iframe so that it
   fits (contain) and centres it horizontally and vertically. Nothing is measured across
   the iframe boundary, so slide zoom, reveal scaling and resizing cannot disturb it.
@@ -18,9 +19,14 @@ from pathlib import Path
 
 _ARTIFACTS = Path(__file__).parent / "artifacts"
 
+# The marimo editor scrolls a cell output taller than 610px (its 1rem padding
+# included). With the default gap of 2.5rem a slot of 530px stays inside that.
+_NOTEBOOK_FIT_H = 530
+
 _SLOT_CSS = """<style>
 .ml-artifact { position: relative; margin-left: auto; margin-right: auto;
-  aspect-ratio: var(--w) / var(--h); max-width: calc(var(--w) * var(--max) * 1px); }
+  aspect-ratio: var(--w) / var(--h);
+  max-width: min(calc(var(--w) * var(--max) * 1px), var(--fit-w)); }
 .ml-artifact iframe { position: absolute; inset: 0; width: 100%; height: 100%;
   border: 0; display: block; background: transparent; }
 .ml-artifact.fixed { aspect-ratio: auto; max-width: none; }
@@ -90,7 +96,8 @@ def artifact(
 
     The figure is scaled to fit its slot and centred in it, never beyond ``max_scale``
     times its logical size. In slides the slot takes the room left under the text; in
-    the notebook it has the aspect ratio of the figure. ``width`` is the slot width as a
+    the notebook it has the aspect ratio of the figure, capped at a height the cell
+    shows without scrolling. ``width`` is the slot width as a
     share of the slide (``"70%"``). ``height`` (pixels) gives the slot a fixed height
     instead of filling. ``gap`` is the space between the text above and the slot."""
     import marimo as mo
@@ -109,7 +116,11 @@ def artifact(
     html = html.replace("<head>", "<head>" + head, 1)
 
     fixed = height is not None
-    style = f"--w:{w};--h:{h};--max:{max_scale};width:{width};margin-top:{gap};"
+    fit_w = _NOTEBOOK_FIT_H * int(w) / int(h)
+    style = (
+        f"--w:{w};--h:{h};--max:{max_scale};--fit-w:{fit_w:.0f}px;"
+        f"width:{width};margin-top:{gap};"
+    )
     if fixed:
         style += f"height:{height}px;"
     kind = "fixed" if fixed else "fill"

@@ -12,9 +12,8 @@ T0 = 12.3  # origin time (s): a nuisance parameter, removed by centring
 _MAX_STATIONS = 512
 # One fixed set of unit-normal pick errors; station i always receives noise[i], so
 # moving the source or a station does not reshuffle the noise.
-_NOISE = torch.randn(
-    _MAX_STATIONS, generator=torch.Generator().manual_seed(0), dtype=torch.float64
-)
+torch.manual_seed(0)
+_NOISE = torch.randn(_MAX_STATIONS, dtype=torch.float64)
 
 
 @dataclass(frozen=True)

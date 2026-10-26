@@ -127,54 +127,11 @@ def posterior_rms(F, d_obs_c, m_true, sigma, prior, live=None, n: int = GRID):
     return ((m_post - torch.as_tensor(m_true)) ** 2).sum(-1).mean().sqrt().item()
 
 
-def posterior_samples(post: Posterior, n_samples: int, generator=None):
+def posterior_samples(post: Posterior, n_samples: int):
     """Samples of a grid posterior, shape (n_samples, 2) km: a grid cell drawn with
     its probability, then a uniform position inside the cell."""
     n = post.density.shape[0]
     p = post.density.flatten() / post.density.sum()
-    k = torch.multinomial(p, n_samples, replacement=True, generator=generator)
-    jitter = torch.rand(n_samples, 2, generator=generator, dtype=torch.float64) - 0.5
+    k = torch.multinomial(p, n_samples, replacement=True)
+    jitter = torch.rand(n_samples, 2, dtype=torch.float64) - 0.5
     return (grid_sources(n)[k] + jitter * BOX / (n - 1)).clamp(0, BOX)
-
-
-def _bilinear(field: torch.Tensor, m: torch.Tensor) -> torch.Tensor:
-    """Fields on the grid (E, n, n) indexed [y, x], read at one point each (E, 2)."""
-    n = field.shape[-1]
-    f = (m / BOX * (n - 1)).clamp(0, n - 1 - 1e-9)
-    i0, j0 = f[:, 0].floor().long(), f[:, 1].floor().long()
-    tx, ty = f[:, 0] - i0, f[:, 1] - j0
-    e = torch.arange(len(m))
-
-    def at(j, i):
-        return field[e, j, i]
-
-    bottom = (1 - tx) * at(j0, i0) + tx * at(j0, i0 + 1)
-    top = (1 - tx) * at(j0 + 1, i0) + tx * at(j0 + 1, i0 + 1)
-    return (1 - ty) * bottom + ty * top
-
-
-def posterior_scores(F, d_obs_c, m_true, sigma, prior, live=None, n: int = GRID):
-    """How the exact posterior scores the true sources of E events.
-
-    Returns ``nll`` (E,), the negative log posterior density at the true source
-    (density in 1/km²), and ``level`` (E,), the smallest credible level whose
-    highest-density region contains the true source. For a calibrated posterior the
-    levels are uniform on [0, 1]; the mean ``nll`` is the floor for any learned
-    density trained under the same prior.
-    """
-    m_true = torch.as_tensor(m_true, dtype=torch.float64)
-    cell = (BOX / (n - 1)) ** 2
-    m = grid_sources(n)
-    F_grid = F(m[:, 0], m[:, 1])
-    nll, level = [], []
-    for d, mt in zip(
-        torch.as_tensor(d_obs_c, dtype=torch.float64).split(64),
-        m_true.split(64),
-        strict=True,
-    ):
-        p = torch.softmax(log_posterior(F, d, sigma, prior, live, n, F_grid), dim=1)
-        density = p / cell
-        at_truth = _bilinear(density.reshape(-1, n, n), mt)
-        nll.append(-at_truth.clamp_min(1e-300).log())
-        level.append((p * (density > at_truth[:, None])).sum(1))
-    return torch.cat(nll), torch.cat(level)

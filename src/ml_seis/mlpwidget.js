@@ -180,6 +180,7 @@ function render({ model, el }) {
 
   // ---- header bar -------------------------------------------------------------
   const bar = elt("div", "mls-bar");
+  bar.style.flexWrap = "nowrap";  // one line: the credit never wraps below the bar
   const trainBtn = elt("button", "mlp-train-btn", "TRAIN");
   trainBtn.onclick = train;
   const tp = uiTransport({
@@ -219,7 +220,7 @@ function render({ model, el }) {
   drawAct(model.get("activation"));
   const epInput = uiNumber(model.get("epochs"), EPOCHS, (v) => setInput("epochs", v));
   const credit = elt("div", "mlp-note");  // credit, right end of the bar
-  credit.style.cssText = "width:auto;align-self:center;white-space:nowrap;";
+  credit.style.cssText = "width:auto;align-self:center;white-space:nowrap;flex:none;";
   credit.innerHTML = `inspired by <a href="https://playground.tensorflow.org" ` +
     `target="_blank" rel="noopener" style="color:${C.blue}">TensorFlow Playground</a>`;
   const retrainSeg = uiSegmented([[true, "on change"], [false, "on button"]], auto, (v) => {

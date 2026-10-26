@@ -32,16 +32,16 @@ def _stars(ax, m, colour, label=None):
 
 def dataset_figure(scene, prior="uniform", seed=3, n_events=1000):
     """Training pairs from ``prior`` at the stations of ``scene``, shown as the numbers
-    a program would print: the map with three sources, and next to it the rows of the
-    two arrays the network learns from, the sources ``m`` (km) and the centred picks
-    ``d~`` (s) the stations record for them. ``n_events`` only labels the shapes of the
-    full arrays."""
+    a program would print: the map with all ``n_events`` sources (three of
+    them starred), and next to it the rows of the two arrays the network learns from,
+    the sources ``m`` (km) and the centred picks ``d~`` (s) the stations record."""
     import matplotlib.pyplot as plt
     import torch
 
-    generator = torch.Generator().manual_seed(seed)
-    m = sample_prior(prior, 3, generator)
-    d = physics.observe(scene.F, m, scene.sigma, scene.live, generator)
+    torch.manual_seed(seed)
+    m = sample_prior(prior, 3)
+    d = physics.observe(scene.F, m, scene.sigma, scene.live)
+    others = sample_prior(prior, max(n_events - 3, 0))  # the rest of the set
     xi_x, xi_y, n_stations = scene.xi_x, scene.xi_y, scene.n_stations
     mono = {"family": "DejaVu Sans Mono", "size": 11, "va": "center"}
     ink, ink2, red = TOKENS["ink"], TOKENS["ink2"], _c("C1")
@@ -54,8 +54,9 @@ def dataset_figure(scene, prior="uniform", seed=3, n_events=1000):
             1, 2, figsize=(9, 3.6), layout="constrained", width_ratios=[1, 1.75]
         )
         _draw_prior(ax, prior, NO_EVENTS, red, xi_x, xi_y)
+        ax.scatter(*others.numpy().T, s=3, color=red, lw=0, zorder=4)
         _stars(ax, m.numpy(), red)
-        ax.set_title(f"three sources from the {prior} prior")
+        ax.set_title(f"{n_events} sources from the {prior} prior")
 
         out.set_axis_off()
         out.set_xlim(0, 1)
@@ -94,12 +95,12 @@ def split_figure(scene, sizes, prior="uniform", seed=0):
     import matplotlib.pyplot as plt
     import torch
 
-    generator = torch.Generator().manual_seed(seed)
+    torch.manual_seed(seed)
     sets = (("train", "C0"), ("validation", "C1"), ("test", "C4"))
     with plt.style.context(style("boxed")):
         fig, axes = plt.subplots(1, 3, figsize=(9, 3.6), layout="constrained")
         for ax, (name, colour), n in zip(axes, sets, sizes, strict=True):
-            events = sample_prior(prior, n, generator)
+            events = sample_prior(prior, n)
             _draw_prior(ax, prior, events, _c(colour), scene.xi_x, scene.xi_y)
             ax.set_title(f"{name}: {n} events")
             ax.set_xlabel("x (km)")
@@ -155,9 +156,9 @@ def posterior_figure(scene, prior, sigma=1.0, seed=5):
     from matplotlib.patches import Rectangle
     from matplotlib.ticker import MultipleLocator
 
-    generator = torch.Generator().manual_seed(seed)
-    m_true = sample_prior(prior, 1, generator)
-    d = physics.observe(scene.F, m_true, sigma, scene.live, generator)[0]
+    torch.manual_seed(seed)
+    m_true = sample_prior(prior, 1)
+    d = physics.observe(scene.F, m_true, sigma, scene.live)[0]
     likelihood = grid_posterior(scene.F, d, sigma, None, scene.live)  # flat prior
     posterior = grid_posterior(scene.F, d, sigma, prior, scene.live)
     m_true, xi_x, xi_y = m_true[0], scene.xi_x, scene.xi_y
@@ -240,7 +241,47 @@ def learning_curves_figure(runs, floor):
     return fig
 
 
+def cost_figure(n=100, ks=(4, 8), dims=range(2, 11)):
+    """Numbers needed to hold the answer against the number of unknowns ``d``: a grid
+    with ``n`` nodes per axis (``n ** d``, the exact posterior) and Gaussian mixtures
+    with ``K`` components, each K logits, K means and K Cholesky factors,
+    ``K (1 + d + d (d + 1) / 2)`` numbers (6 K for d = 2)."""
+    import matplotlib.pyplot as plt
+
+    d = np.array(list(dims))
+    with plt.style.context(style("open")):
+        grid_colour, vermillion = TOKENS["ink"], _c("C1")
+        fig, ax = plt.subplots(figsize=(9, 3.4), layout="constrained")
+        ax.plot(
+            d, float(n) ** d, "o-", color=grid_colour, label=f"grid, {n} nodes per axis"
+        )
+        for k, dash in zip(ks, ("-", "--"), strict=False):
+            ax.plot(
+                d, k * (1 + d + d * (d + 1) / 2), "o" + dash, color=vermillion,
+                label=f"Gaussian mixture, K = {k}",
+            )  # fmt: skip
+        ax.set_yscale("log")
+        ax.set_yticks([1e2, 1e6, 1e10, 1e14, 1e18])
+        ax.minorticks_off()
+        ax.set_xticks(
+            [2, 4, 10],
+            ["2\nepicentre", "4\nhypocentre,\norigin time", "10\n+ moment\ntensor"],
+        )
+        ax.set_xlim(1.7, 10.3)
+        ax.set_xlabel("unknowns d")
+        ax.set_ylabel("numbers to describe the answer")
+        ax.annotate(
+            "this lecture", (2, float(n) ** 2), xytext=(2.4, 1e9),
+            arrowprops={"arrowstyle": "-", "color": TOKENS["ink2"], "lw": 0.8},
+            color=TOKENS["ink"],
+        )  # fmt: skip
+        ax.legend(loc="lower right", bbox_to_anchor=(1.0, 0.22), fontsize=7.5)
+    plt.close(fig)
+    return fig
+
+
 __all__ = [
+    "cost_figure",
     "dataset_figure",
     "learning_curves_figure",
     "posterior_figure",
