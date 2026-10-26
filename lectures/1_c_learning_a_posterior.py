@@ -24,7 +24,24 @@ import marimo
 __generated_with = "0.25.2"
 app = marimo.App(
     width="full",
-    layout_file="layouts/1_c_learning_a_posterior.slides.json",
+    layout_file=(
+        "data:application/json;base64,eyJ0eXBlIjoic2xpZGVzIiwiZGF0YSI6eyJjZWxscyI6W"
+        "3sidHlwZSI6InNraXAifSx7InR5cGUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXB"
+        "lIjoic2tpcCJ9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2tpc"
+        "CJ9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0seyJ"
+        "0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiO"
+        "iJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q29kZSI6ZmF"
+        "sc2V9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0se"
+        "yJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJzbGlkZSIsInNob3dDb2R"
+        "lIjpmYWxzZX0seyJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhb"
+        "HNlfSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNraXAifSx7InR"
+        "5cGUiOiJza2lwIn0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHsidHlwZSI6I"
+        "nNraXAifSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNraXAifSx"
+        "7InR5cGUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q"
+        "29kZSI6ZmFsc2V9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJ"
+        "mcmFnbWVudCIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoic2tpcCJ9XSwiZGVjayI6eyJ0c"
+        "mFuc2l0aW9uIjoibm9uZSIsInZlcnRpY2FsQWxpZ24iOiJ0b3AifX19"
+    ),
     css_file="lecture_slides.css",
     html_head_file="slides_head.html",
 )

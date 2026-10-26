@@ -24,7 +24,33 @@ import marimo
 __generated_with = "0.25.2"
 app = marimo.App(
     width="full",
-    layout_file="layouts/1_a_locating_with_gradients.slides.json",
+    layout_file=(
+        "data:application/json;base64,eyJ0eXBlIjoic2xpZGVzIiwiZGF0YSI6eyJjZWxscyI6W"
+        "3sidHlwZSI6InNraXAifSx7InR5cGUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXB"
+        "lIjoic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiO"
+        "mZhbHNlfSx7InR5cGUiOiJmcmFnbWVudCIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoic2x"
+        "pZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHsidHlwZSI6ImZyYWdtZW50Iiwic2hvd0NvZGUiOmZhb"
+        "HNlfSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNsaWRlIiwic2h"
+        "vd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlI"
+        "joic2tpcCJ9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWx"
+        "zZX0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHsidHlwZSI6InNsaWRlIiwic"
+        "2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXB"
+        "lIjoic2tpcCJ9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJmc"
+        "mFnbWVudCIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoiZnJhZ21lbnQiLCJzaG93Q29kZSI"
+        "6ZmFsc2V9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJzbGlkZ"
+        "SIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHs"
+        "idHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJza2lwIiwic2hvd0NvZ"
+        "GUiOmZhbHNlfSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNraXA"
+        "ifSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2tpcCIsInNob3dDb2RlIjpmYWxzZX0seyJ0e"
+        "XBlIjoic2tpcCJ9LHsidHlwZSI6InNraXAiLCJzaG93Q29kZSI6ZmFsc2V9LHsidHlwZSI6InN"
+        "saWRlIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJmcmFnbWVudCIsInNob3dDb2RlIjpmY"
+        "WxzZX0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHsidHlwZSI6InNraXAifSx"
+        "7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZ"
+        "GUiOmZhbHNlfSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNraXA"
+        "ifSx7InR5cGUiOiJza2lwIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJzbGlkZSIsInNob"
+        "3dDb2RlIjpmYWxzZX1dLCJkZWNrIjp7InRyYW5zaXRpb24iOiJub25lIiwidmVydGljYWxBbGl"
+        "nbiI6InRvcCJ9fX0="
+    ),
     css_file="lecture_slides.css",
     html_head_file="slides_head.html",
 )

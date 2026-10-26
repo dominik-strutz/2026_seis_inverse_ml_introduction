@@ -68,7 +68,11 @@ def inputs(part: str) -> list[Path]:
     """Every file whose content decides what the snapshot of ``part`` shows."""
     notebook = ROOT / "lectures" / f"{part}.py"
     files = {notebook}
-    todo, seen = sorted(_imports(notebook)), set()
+    # Python loads ``ml_seis/__init__.py`` before any of its submodules.  Follow
+    # it as well: it re-exports helpers from several modules, and a change in
+    # one of those imports can change what a notebook receives from
+    # ``from ml_seis import ...``.
+    todo, seen = sorted(_imports(notebook) | {"__init__"}), set()
     while todo:
         name = todo.pop()
         if name in seen:

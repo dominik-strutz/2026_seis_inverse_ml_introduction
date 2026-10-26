@@ -129,7 +129,7 @@
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: center;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='RGSE-0' random-id='3d4e75dd-ff4c-edc4-448c-ccadc5cbfffb'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;9717719aacbf4c16964221b2a3f10085&quot;}' data-label='null' data-model-id='&quot;9717719aacbf4c16964221b2a3f10085&quot;'></marimo-anywidget></marimo-ui-element></div>"
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: center;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='RGSE-0' random-id='7818b881-41b7-737a-03b1-32dd33f9cf04'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;e334a43ddcc64b1da0bb8aa1492eebfd&quot;}' data-label='null' data-model-id='&quot;e334a43ddcc64b1da0bb8aa1492eebfd&quot;'></marimo-anywidget></marimo-ui-element></div>"
           }
         }
       ],
@@ -220,7 +220,7 @@
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='ROlb-0' random-id='5d7ab9c0-50e5-4e5d-c560-8fb0012b168a'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;320cf83f5829418d951b6444997ea498&quot;}' data-label='null' data-model-id='&quot;320cf83f5829418d951b6444997ea498&quot;'></marimo-anywidget></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"three-things-to-look-for\">Three things to look for</h3>\n<ul>\n<li><strong>One against several.</strong> What does a single component do to a curved band\n  with several clusters?</li>\n<li><strong>Fitted against held out.</strong> How do the NLL of the fitted and of the held-out\n  samples change as <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> grows, and where do they part?</li>\n<li><strong>Few against many.</strong> What do few fitted samples do that many do not?</li>\n</ul></span></div>"
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='ROlb-0' random-id='e62e3621-894f-deea-56f0-8bcc012fd33a'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;2408d4fd9961461cbbe22918b61a1b0d&quot;}' data-label='null' data-model-id='&quot;2408d4fd9961461cbbe22918b61a1b0d&quot;'></marimo-anywidget></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"three-things-to-look-for\">Three things to look for</h3>\n<ul>\n<li><strong>One against several.</strong> What does a single component do to a curved band\n  with several clusters?</li>\n<li><strong>Fitted against held out.</strong> How do the NLL of the fitted and of the held-out\n  samples change as <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> grows, and where do they part?</li>\n<li><strong>Few against many.</strong> What do few fitted samples do that many do not?</li>\n</ul></span></div>"
           }
         }
       ],
@@ -311,7 +311,7 @@
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='DnEU-0' random-id='b0424063-5112-12fe-b324-18726300f601'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;50acd8b4b1e14d2eab699a7f58138b6b&quot;}' data-label='null' data-model-id='&quot;50acd8b4b1e14d2eab699a7f58138b6b&quot;'></marimo-anywidget></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"four-things-to-look-for\">Four things to look for</h3>\n<span class=\"paragraph\">Change one thing at a time and watch the maps, the curves and the errors.</span>\n<ul>\n<li><strong>Output.</strong> What does the network return when the data allow two answers?</li>\n<li><strong>Components.</strong> How many bumps does the answer need?</li>\n<li><strong>Ambiguity.</strong> What happens to the answer as the event moves towards the line of\n  stations, and away from it?</li>\n<li><strong>Shift.</strong> Does the spread of the mixture tell you when the network is out of its\n  depth?</li>\n</ul></span></div>"
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='DnEU-0' random-id='a047575a-9121-35ab-bd44-fb5831a20157'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;84fb6bb7aadb4e6ca8beda9021e0ef5b&quot;}' data-label='null' data-model-id='&quot;84fb6bb7aadb4e6ca8beda9021e0ef5b&quot;'></marimo-anywidget></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"four-things-to-look-for\">Four things to look for</h3>\n<span class=\"paragraph\">Change one thing at a time and watch the maps, the curves and the errors.</span>\n<ul>\n<li><strong>Output.</strong> What does the network return when the data allow two answers?</li>\n<li><strong>Components.</strong> How many bumps does the answer need?</li>\n<li><strong>Ambiguity.</strong> What happens to the answer as the event moves towards the line of\n  stations, and away from it?</li>\n<li><strong>Shift.</strong> Does the spread of the mixture tell you when the network is out of its\n  depth?</li>\n</ul></span></div>"
           }
         }
       ],
@@ -389,7 +389,7 @@
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='height:80vh'><div style='display: flex;flex: 1;flex-direction: column;justify-content: center;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='pHFh-0' random-id='51b54721-f23e-e1c5-295d-6c5457a168b5'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;bfce770bbc8944fa957671506830ab8e&quot;}' data-label='null' data-model-id='&quot;bfce770bbc8944fa957671506830ab8e&quot;'></marimo-anywidget></marimo-ui-element></div></div>"
+            "text/html": "<div style='height:80vh'><div style='display: flex;flex: 1;flex-direction: column;justify-content: center;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='pHFh-0' random-id='2e935d92-1949-e3af-2748-8b9e79558043'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;da054b9ff3d343c98b92f14796869d13&quot;}' data-label='null' data-model-id='&quot;da054b9ff3d343c98b92f14796869d13&quot;'></marimo-anywidget></marimo-ui-element></div></div>"
           }
         }
       ],

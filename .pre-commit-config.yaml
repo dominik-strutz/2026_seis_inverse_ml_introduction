@@ -9,4 +9,16 @@ repos:
         entry: uv run python scripts/snapshots.py check
         language: system
         pass_filenames: false
-        files: ^(lectures/[12]_[a-d]_.*\.py|src/ml_seis/|lectures/__marimo__/session/)
+        # Checking hashes is quick.  Run it on every commit so an already stale
+        # preview cannot slip through together with an unrelated change.
+        always_run: true
+      - id: layouts
+        # molab and a downloaded notebook see one file, so the slide layout must
+        # be embedded in it (`make layouts`), not only in lectures/layouts/
+        name: slide layouts are embedded in the notebooks
+        entry: uv run python scripts/embed_layouts.py check
+        language: system
+        pass_filenames: false
+        # As above, validate every commit instead of relying on the staged-file
+        # filter to notice an older, stale notebook.
+        always_run: true

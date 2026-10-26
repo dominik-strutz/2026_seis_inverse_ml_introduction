@@ -53,8 +53,20 @@ commands above work offline and use your local copy of `src/ml_seis`.
 
 ## Presenting as slides
 
-The lecture notebooks are laid out as slides (`layouts/*.slides.json` and
-`lecture_slides.css` in `lectures/`).
+The lecture notebooks are laid out as slides. Each notebook embeds its slide
+layout in its own header (a base64 data URI in `layout_file`), so the deck —
+slide order, fragments, hidden cells — also works on molab and for anyone who
+downloads a single notebook; `lectures/layouts/*.slides.json` holds the same
+layouts as the editable source, and `make layouts` re-embeds them. The slide
+styling (`lecture_slides.css`, `slides_head.html` in `lectures/`) is read from
+disk next to the notebook and therefore applies to local slides only.
+
+For the three notebooks linked above, the repository also contains marimo session
+snapshots. They give molab its ready-made preview outputs instead of making a reader
+wait for every cell to run. After changing a published notebook or a helper it uses,
+run `make snapshots`: it embeds layouts first, rebuilds those previews, and records
+the exact input hash. `make hooks` installs pre-commit checks that reject stale
+previews or layouts.
 
 ```bash
 # Lecturing: read-only slides, code hidden (add --include-code to show it)
