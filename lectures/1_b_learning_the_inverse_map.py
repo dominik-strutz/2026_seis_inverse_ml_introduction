@@ -121,6 +121,8 @@ def _(artifact, mo):
             # Part 1b: learning the inverse map
 
             ### Machine learning and inversion for seismologists
+
+            https://github.com/dominik-strutz/2026_seis_inverse_ml_introduction
             """),
             artifact("title_figure", width="65%"),
         ],
