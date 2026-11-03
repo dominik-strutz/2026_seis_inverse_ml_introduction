@@ -28,6 +28,20 @@
   display: none;
 }
 
+/* Repo link on every slide, bottom right */
+.reveal::after {
+  content: "github.com/dominik-strutz/2026_seis_inverse_ml_introduction";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 3px 10px;
+  color: #6b7280;
+  font-family: "DejaVu Sans", Helvetica, sans-serif;
+  font-size: 11px;
+  z-index: 40;
+  pointer-events: none;
+}
+
 /* Matplotlib figures from Python cells: centred horizontally */
 .reveal .slides section img {
   display: block;
