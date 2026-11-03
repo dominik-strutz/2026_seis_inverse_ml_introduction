@@ -98,20 +98,7 @@
     },
     {
       "id": "SFPL",
-      "code_hash": "1d545b3f66dd9378e05fd278a364d38b",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"the-loss-picks-the-summary\">The loss picks the summary</h2>\n<span class=\"paragraph\">The posterior <marimo-tex class=\"arithmatex\">||(p(\\mathbf{m} \\mid \\tilde{\\mathbf{d}})||)</marimo-tex> describes how likely it is\nfor the source to be at <marimo-tex class=\"arithmatex\">||(\\mathbf{m}||)</marimo-tex> given our prior knowledge and what we\nmeasured. A network outputs one point <marimo-tex class=\"arithmatex\">||(\\hat{\\mathbf{m}}||)</marimo-tex>, so the <strong>loss decides\nwhich point</strong>: training minimises the expected loss <marimo-tex class=\"arithmatex\">||(S(\\hat{\\mathbf{m}})||)</marimo-tex>, with\n<marimo-tex class=\"arithmatex\">||(\\mathbb{E}||)</marimo-tex> the average over sources <marimo-tex class=\"arithmatex\">||(\\mathbf{m}||)</marimo-tex> drawn from the posterior.</span>\n<span class=\"paragraph\"><strong>MSE</strong> (mean squared error): big misses cost far more than small ones</span>\n<marimo-tex class=\"arithmatex\">||[\nS(\\hat{\\mathbf{m}}) = \\mathbb{E}\\left[\\lVert \\mathbf{m} - \\hat{\\mathbf{m}}\n\\rVert^2_2 \\right]\n\\quad\\Rightarrow\\quad\n\\hat{\\mathbf{m}} = \\mathbb{E}[\\mathbf{m}]\n||]</marimo-tex><span class=\"paragraph\">The <strong>mean</strong>. With two lobes it lands between them, where the source is not.</span>\n<span class=\"paragraph\"><strong>MAE</strong> (mean absolute error): a miss costs in proportion to its size</span>\n<marimo-tex class=\"arithmatex\">||[\nS(\\hat{\\mathbf{m}}) = \\mathbb{E}\\left[\\lVert \\mathbf{m} - \\hat{\\mathbf{m}}\n\\rVert_1\\right]\n\\quad\\Rightarrow\\quad\n\\hat{\\mathbf{m}} = \\operatorname{median}[\\mathbf{m}]\n||]</marimo-tex><span class=\"paragraph\">The <strong>median</strong>, of <marimo-tex class=\"arithmatex\">||(m_x||)</marimo-tex> and <marimo-tex class=\"arithmatex\">||(m_y||)</marimo-tex> separately: half of the posterior lies on\neither side. With two lobes it sits inside one.</span>\n<span class=\"paragraph\"><strong>MAP</strong> (maximum a posteriori): no averaging. With prior density <marimo-tex class=\"arithmatex\">||(\\rho_M||)</marimo-tex> from\nbefore</span>\n<marimo-tex class=\"arithmatex\">||[\n\\hat{\\mathbf{m}} = \\arg\\min_{\\mathbf{m}}\n\\left[\\frac{S(\\mathbf{m})}{\\sigma^2} - \\log \\rho_M(\\mathbf{m})\\right]\n\\quad\\Rightarrow\\quad\n\\hat{\\mathbf{m}} = \\arg\\max_{\\mathbf{m}}\\,\np(\\mathbf{m} \\mid \\tilde{\\mathbf{d}})\n||]</marimo-tex><span class=\"paragraph\">The highest <strong>peak</strong> of the posterior.</span>\n<span class=\"paragraph\">If the posterior is one symmetric peak, all three agree. For multimodal\ndistributions they do not, and <strong>none of them is wrong, they answer different\nquestions</strong>. No single point can say \"it is either here or there\": that needs the\nwhole density, which is what we learn next.</span></span>"
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "BYtC",
-      "code_hash": "d61d33f48fd8eba0fe0a31d8a5c043ff",
+      "code_hash": "d8344ce16f5f0894c9590bfc535acb9c",
       "outputs": [
         {
           "type": "data",
@@ -123,13 +110,26 @@
       "console": []
     },
     {
-      "id": "RGSE",
-      "code_hash": "fbbe10145bc559a0d09ca86611e77bfe",
+      "id": "BYtC",
+      "code_hash": "977fec1fa7ac3e14d988f8ea65e54b16",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: center;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='RGSE-0' random-id='7818b881-41b7-737a-03b1-32dd33f9cf04'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;e334a43ddcc64b1da0bb8aa1492eebfd&quot;}' data-label='null' data-model-id='&quot;e334a43ddcc64b1da0bb8aa1492eebfd&quot;'></marimo-anywidget></marimo-ui-element></div>"
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"the-loss-picks-the-summary\">The loss picks the summary</h2>\n<span class=\"paragraph\">The posterior <marimo-tex class=\"arithmatex\">||(p(\\mathbf{m} \\mid \\tilde{\\mathbf{d}})||)</marimo-tex> describes how likely it is\nfor the source to be at <marimo-tex class=\"arithmatex\">||(\\mathbf{m}||)</marimo-tex> given our prior knowledge and what we\nmeasured. A network outputs one point <marimo-tex class=\"arithmatex\">||(\\hat{\\mathbf{m}}||)</marimo-tex>, so the <strong>loss decides\nwhich point</strong>: training minimises the expected loss <marimo-tex class=\"arithmatex\">||(S(\\hat{\\mathbf{m}})||)</marimo-tex>, with\n<marimo-tex class=\"arithmatex\">||(\\mathbb{E}||)</marimo-tex> the average over sources <marimo-tex class=\"arithmatex\">||(\\mathbf{m}||)</marimo-tex> drawn from the posterior.</span>\n<span class=\"paragraph\">Here is the posterior of one event, with the true source marked. We try three\nlosses, one after another, and see where each puts <marimo-tex class=\"arithmatex\">||(\\hat{\\mathbf{m}}||)</marimo-tex>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "fd298410de63036114562af3d1a987f3",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='width:74%;margin:0 auto'><marimo-ui-element object-id='RGSE-0' random-id='effb6388-fb9e-5211-9059-0a7d73786bb1'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;1acdc425d60c4493acbe4d8a4e96c167&quot;}' data-label='null' data-model-id='&quot;1acdc425d60c4493acbe4d8a4e96c167&quot;'></marimo-anywidget></marimo-ui-element></div>"
           }
         }
       ],
@@ -137,6 +137,97 @@
     },
     {
       "id": "Kclp",
+      "code_hash": "906ba90729e41cd32fdd5aa86d614cf2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"loss-1-mse-the-mean\">Loss 1: MSE, the mean</h2>\n<span class=\"paragraph\"><strong>Mean squared error</strong>: big misses cost far more than small ones</span>\n<marimo-tex class=\"arithmatex\">||[\nS(\\hat{\\mathbf{m}}) = \\mathbb{E}\\left[\\lVert \\mathbf{m} - \\hat{\\mathbf{m}}\n\\rVert^2_2 \\right]\n\\quad\\Rightarrow\\quad\n\\hat{\\mathbf{m}} = \\mathbb{E}[\\mathbf{m}]\n||]</marimo-tex><span class=\"paragraph\">The <strong>mean</strong> of the posterior. With two lobes it lands between them, where the\nsource is not.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "9e6b82fd8ecb73efb2e9c0dba5d7fae2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='width:74%;margin:0 auto'><marimo-ui-element object-id='emfo-0' random-id='765626a5-c31d-dd12-474e-093683359eee'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;6de508595a474f16b09f45daa8f2f0b6&quot;}' data-label='null' data-model-id='&quot;6de508595a474f16b09f45daa8f2f0b6&quot;'></marimo-anywidget></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "b14adfb3f40c162dec94f19e3a338ff1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"loss-2-mae-the-median\">Loss 2: MAE, the median</h2>\n<span class=\"paragraph\"><strong>Mean absolute error</strong>: a miss costs in proportion to its size</span>\n<marimo-tex class=\"arithmatex\">||[\nS(\\hat{\\mathbf{m}}) = \\mathbb{E}\\left[\\lVert \\mathbf{m} - \\hat{\\mathbf{m}}\n\\rVert_1\\right]\n\\quad\\Rightarrow\\quad\n\\hat{\\mathbf{m}} = \\operatorname{median}[\\mathbf{m}]\n||]</marimo-tex><span class=\"paragraph\">The <strong>median</strong>, of <marimo-tex class=\"arithmatex\">||(m_x||)</marimo-tex> and <marimo-tex class=\"arithmatex\">||(m_y||)</marimo-tex> separately: half of the posterior lies on\neither side. With two lobes it sits inside one.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "d3f12df9ca60282d09cc1375de94692b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='width:74%;margin:0 auto'><marimo-ui-element object-id='nWHF-0' random-id='511c4e5e-f57e-87be-aa16-70052c52c8fa'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;f46cb1a806cd42a0ae936c1f7d41625d&quot;}' data-label='null' data-model-id='&quot;f46cb1a806cd42a0ae936c1f7d41625d&quot;'></marimo-anywidget></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "15c4e086dab339741e0c79d006637811",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"loss-3-map-the-peak\">Loss 3: MAP, the peak</h2>\n<span class=\"paragraph\"><strong>Maximum a posteriori</strong>: no averaging. With the prior density <marimo-tex class=\"arithmatex\">||(\\rho_M||)</marimo-tex> from\nbefore</span>\n<marimo-tex class=\"arithmatex\">||[\n\\hat{\\mathbf{m}} = \\arg\\min_{\\mathbf{m}}\n\\left[\\frac{S(\\mathbf{m})}{\\sigma^2} - \\log \\rho_M(\\mathbf{m})\\right]\n\\quad\\Rightarrow\\quad\n\\hat{\\mathbf{m}} = \\arg\\max_{\\mathbf{m}}\\,\np(\\mathbf{m} \\mid \\tilde{\\mathbf{d}})\n||]</marimo-tex><span class=\"paragraph\">The highest <strong>peak</strong> of the posterior.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "9ee6f563d25d30011f9b608f03c4a580",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='width:74%;margin:0 auto'><marimo-ui-element object-id='ZHCJ-0' random-id='4a54ceb5-8c0b-fca7-129b-a58245d4dff9'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;653ec5cbeedd4c39a71ab842b5447601&quot;}' data-label='null' data-model-id='&quot;653ec5cbeedd4c39a71ab842b5447601&quot;'></marimo-anywidget></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "edc99751a018cb3da107addea9dc8922",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"three-losses-three-answers\">Three losses, three answers</h2>\n<span class=\"paragraph\">If the posterior is one symmetric peak, all three agree. For multimodal\ndistributions they do not, and <strong>none of them is wrong, they answer different\nquestions</strong>. No single point can say \"it is either here or there\": that needs the\nwhole density, which is what we learn next.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
       "code_hash": "2b3f67594b9d33f15820a2d78ceadbb9",
       "outputs": [
         {
@@ -149,7 +240,7 @@
       "console": []
     },
     {
-      "id": "emfo",
+      "id": "TqIu",
       "code_hash": "8d563ab6f8627a8c2ac5644297a8b8df",
       "outputs": [
         {
@@ -162,7 +253,7 @@
       "console": []
     },
     {
-      "id": "Hstk",
+      "id": "Vxnm",
       "code_hash": "c9831ed45bfa654ffcfb3daf5a396c97",
       "outputs": [
         {
@@ -175,7 +266,7 @@
       "console": []
     },
     {
-      "id": "nWHF",
+      "id": "DnEU",
       "code_hash": "08d1fd82e333a2b0182160487ac3beb7",
       "outputs": [
         {
@@ -188,7 +279,7 @@
       "console": []
     },
     {
-      "id": "iLit",
+      "id": "ulZA",
       "code_hash": "c6bbe2e0189c3212720a1ce0b6549454",
       "outputs": [
         {
@@ -201,7 +292,7 @@
       "console": []
     },
     {
-      "id": "ZHCJ",
+      "id": "ecfG",
       "code_hash": "11ddf295f19d543e954516e95c668ac1",
       "outputs": [
         {
@@ -214,20 +305,20 @@
       "console": []
     },
     {
-      "id": "ROlb",
+      "id": "Pvdt",
       "code_hash": "12f6aca8456b79688c0d01d741aba9f3",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='ROlb-0' random-id='e62e3621-894f-deea-56f0-8bcc012fd33a'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;2408d4fd9961461cbbe22918b61a1b0d&quot;}' data-label='null' data-model-id='&quot;2408d4fd9961461cbbe22918b61a1b0d&quot;'></marimo-anywidget></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"three-things-to-look-for\">Three things to look for</h3>\n<ul>\n<li><strong>One against several.</strong> What does a single component do to a curved band\n  with several clusters?</li>\n<li><strong>Fitted against held out.</strong> How do the NLL of the fitted and of the held-out\n  samples change as <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> grows, and where do they part?</li>\n<li><strong>Few against many.</strong> What do few fitted samples do that many do not?</li>\n</ul></span></div>"
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='Pvdt-0' random-id='d5636327-216f-a858-5d64-44515a084067'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;99d3a942d9d74d1b87de002ac3e0c66b&quot;}' data-label='null' data-model-id='&quot;99d3a942d9d74d1b87de002ac3e0c66b&quot;'></marimo-anywidget></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"three-things-to-look-for\">Three things to look for</h3>\n<ul>\n<li><strong>One against several.</strong> What does a single component do to a curved band\n  with several clusters?</li>\n<li><strong>Fitted against held out.</strong> How do the NLL of the fitted and of the held-out\n  samples change as <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> grows, and where do they part?</li>\n<li><strong>Few against many.</strong> What do few fitted samples do that many do not?</li>\n</ul></span></div>"
           }
         }
       ],
       "console": []
     },
     {
-      "id": "qnkX",
+      "id": "ZBYS",
       "code_hash": "cdd8443db4514597a83daa92e78751ef",
       "outputs": [
         {
@@ -240,7 +331,7 @@
       "console": []
     },
     {
-      "id": "TqIu",
+      "id": "aLJB",
       "code_hash": "0cdb059c6cbed50efaf10e68e88cd205",
       "outputs": [
         {
@@ -253,7 +344,7 @@
       "console": []
     },
     {
-      "id": "Vxnm",
+      "id": "nHfw",
       "code_hash": "3dedc3df0a25ceaeb45702123c0e3a4b",
       "outputs": [
         {
@@ -266,8 +357,8 @@
       "console": []
     },
     {
-      "id": "DnEU",
-      "code_hash": "56037aaef0f3dd30407b6c8f1ff84009",
+      "id": "xXTn",
+      "code_hash": "9b45c0025476ba3f5deee9516e5b9e0d",
       "outputs": [
         {
           "type": "data",
@@ -279,7 +370,7 @@
       "console": []
     },
     {
-      "id": "ulZA",
+      "id": "AjVT",
       "code_hash": "80a1906e06276b73d4394dd095e2286e",
       "outputs": [
         {
@@ -292,7 +383,7 @@
       "console": []
     },
     {
-      "id": "ecfG",
+      "id": "pHFh",
       "code_hash": "abad16b5144768ec85461e81b9eb0f55",
       "outputs": [
         {
@@ -305,33 +396,33 @@
       "console": []
     },
     {
-      "id": "Pvdt",
+      "id": "NCOB",
       "code_hash": "17949e2da07ef120b215d110e6b7720f",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='DnEU-0' random-id='a047575a-9121-35ab-bd44-fb5831a20157'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;84fb6bb7aadb4e6ca8beda9021e0ef5b&quot;}' data-label='null' data-model-id='&quot;84fb6bb7aadb4e6ca8beda9021e0ef5b&quot;'></marimo-anywidget></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"four-things-to-look-for\">Four things to look for</h3>\n<span class=\"paragraph\">Change one thing at a time and watch the maps, the curves and the errors.</span>\n<ul>\n<li><strong>Output.</strong> What does the network return when the data allow two answers?</li>\n<li><strong>Components.</strong> How many bumps does the answer need?</li>\n<li><strong>Ambiguity.</strong> What happens to the answer as the event moves towards the line of\n  stations, and away from it?</li>\n<li><strong>Shift.</strong> Does the spread of the mixture tell you when the network is out of its\n  depth?</li>\n</ul></span></div>"
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='xXTn-0' random-id='87159913-da65-b7f1-96e9-3db357f5ba93'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;55e77967af1744fab13f6c5e559d3d40&quot;}' data-label='null' data-model-id='&quot;55e77967af1744fab13f6c5e559d3d40&quot;'></marimo-anywidget></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"four-things-to-look-for\">Four things to look for</h3>\n<span class=\"paragraph\">Change one thing at a time and watch the maps, the curves and the errors.</span>\n<ul>\n<li><strong>Output.</strong> What does the network return when the data allow two answers?</li>\n<li><strong>Components.</strong> How many bumps does the answer need?</li>\n<li><strong>Ambiguity.</strong> What happens to the answer as the event moves towards the line of\n  stations, and away from it?</li>\n<li><strong>Shift.</strong> Does the spread of the mixture tell you when the network is out of its\n  depth?</li>\n</ul></span></div>"
           }
         }
       ],
       "console": []
     },
     {
-      "id": "ZBYS",
-      "code_hash": "fd6b9cf9037900611666d8a14fc6d3d3",
+      "id": "aqbW",
+      "code_hash": "d36775274f8e6028339df1dd2de4b21e",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"how-the-playground-works\">How the playground works</h3>\n<span class=\"paragraph\">The playground of 1b again, on the line of stations and the <code>uniform</code> prior, with\none more control: <strong>OUTPUT</strong> <em>point</em> (MSE) or <em>mixture</em> with <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> components. The\npage opens with 1000 events, two layers of 32 neurons, tanh, Adam, <marimo-tex class=\"arithmatex\">||(\\eta||)</marimo-tex> = 0.003,\nbatches of 64, 100 epochs and a mixture of <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> = 1. MAP A shows the\nnetwork's mixture for the picks of the test event (68 % and 95 % regions, each\ncomponent with its weight). MAP B compares it with the truth: the exact\nposterior is the green shading, the network's 68 % (solid) and 95 % (dashed)\nregions are the orange lines on top. Each setting trains once and is kept.</span></span>"
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"how-the-playground-works\">How the playground works</h3>\n<span class=\"paragraph\">The playground of 1b again, on the line of stations and the <code>uniform</code> prior, with\none more control: <strong>OUTPUT</strong> <em>point</em> (MSE) or <em>mixture</em> with <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> components. The\npage opens with 1000 events, two layers of 32 neurons, tanh, Adam, <marimo-tex class=\"arithmatex\">||(\\eta||)</marimo-tex> = 0.003,\nbatches of 64, 100 epochs and a mixture of <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> = 1. MAP A shows the\nnetwork's mixture for the picks of the test event (68 % and 95 % regions, each\ncomponent with its weight). MAP B compares it with the truth: the exact\nposterior is the red shading, the network's 68 % (solid) and 95 % (dashed)\nregions are the purple lines on top. Each setting trains once and is kept.</span></span>"
           }
         }
       ],
       "console": []
     },
     {
-      "id": "aLJB",
+      "id": "TRpd",
       "code_hash": "aecfb59375d04a3980bd6b99d6694435",
       "outputs": [
         {
@@ -344,7 +435,7 @@
       "console": []
     },
     {
-      "id": "nHfw",
+      "id": "TXez",
       "code_hash": "e89e13723f1581217e812541bf2a44be",
       "outputs": [
         {
@@ -357,20 +448,20 @@
       "console": []
     },
     {
-      "id": "xXTn",
-      "code_hash": "3762aa381ddd6f002a9a1bda1c442c66",
+      "id": "dNNg",
+      "code_hash": "fcc4420f90fed7a22c355af31b9fea53",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<marimo-accordion data-labels='[&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eOutput.&#92;u003c/strong&#92;u003e What does each output return for the picks of the test event?&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;,&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eComponents.&#92;u003c/strong&#92;u003e How many bumps does the answer need?&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;,&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eAmbiguity.&#92;u003c/strong&#92;u003e What happens to the two lobes as the event moves?&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;,&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eShift.&#92;u003c/strong&#92;u003e Does the mixture know when the network is out of its depth?&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;,&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eShift.&#92;u003c/strong&#92;u003e And when the data change in another way?&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;]' data-multiple='false' data-expanded='[]'><div><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Setup.</strong> OUTPUT <em>point</em>, then <em>mixture</em> with <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> = 4.</span>\n<span class=\"paragraph\"><strong>Look for.</strong> <em>point</em>: one dot on the line of stations, between the two lobes of the posterior. <em>mixture</em>: a bump in each lobe; compare the orange regions on MAP B with the green posterior. The error is the same for both (29 km, the dashed floor): it scores only the mean.</span></span></div><div><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Setup.</strong> <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> = 1, 2, then 4.</span>\n<span class=\"paragraph\"><strong>Look for.</strong> <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> = 1 and 2: one ellipse on the line between the lobes, where the source is not. From <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> = 4 a bump in each lobe.</span></span></div><div><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Setup.</strong> Drag the test event (star) towards the line of stations, then away.</span>\n<span class=\"paragraph\"><strong>Look for.</strong> 5 km from the line the lobes of the exact posterior are 8 km apart and look like one, 30 km from it 55 km apart. It always weighs them equally: a line of stations cannot tell north from south.</span></span></div><div><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Setup.</strong> <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> = 4, train prior <em>ridgecrest</em>, press train; then test prior <em>uniform</em>, maps on <em>compare</em>, drag the star into each corner.</span>\n<span class=\"paragraph\"><strong>Look for.</strong> In the corners no training event fell, yet the orange regions stay as small as before and miss the star at all four.</span></span></div><div><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Setup.</strong> <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> = 4, train as it is; then mute one station at a time.</span>\n<span class=\"paragraph\"><strong>Look for.</strong> Unless it is the middle one, the orange regions miss the star although the green posterior still holds it: the mixture's spread is the data's uncertainty, not the network's.</span></span></div></marimo-accordion>"
+            "text/html": "<marimo-accordion data-labels='[&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eOutput.&#92;u003c/strong&#92;u003e What does each output return for the picks of the test event?&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;,&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eComponents.&#92;u003c/strong&#92;u003e How many bumps does the answer need?&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;,&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eAmbiguity.&#92;u003c/strong&#92;u003e What happens to the two lobes as the event moves?&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;,&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eShift.&#92;u003c/strong&#92;u003e Does the mixture know when the network is out of its depth?&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;,&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eShift.&#92;u003c/strong&#92;u003e And when the data change in another way?&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;]' data-multiple='false' data-expanded='[]'><div><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Setup.</strong> OUTPUT <em>point</em>, then <em>mixture</em> with <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> = 4.</span>\n<span class=\"paragraph\"><strong>Look for.</strong> <em>point</em>: one dot on the line of stations, between the two lobes of the posterior. <em>mixture</em>: a bump in each lobe; compare the purple regions on MAP B with the red posterior. The error is the same for both (29 km, the dashed floor): it scores only the mean.</span></span></div><div><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Setup.</strong> <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> = 1, 2, then 4.</span>\n<span class=\"paragraph\"><strong>Look for.</strong> <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> = 1 and 2: one ellipse on the line between the lobes, where the source is not. From <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> = 4 a bump in each lobe.</span></span></div><div><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Setup.</strong> Drag the test event (star) towards the line of stations, then away.</span>\n<span class=\"paragraph\"><strong>Look for.</strong> 5 km from the line the lobes of the exact posterior are 8 km apart and look like one, 30 km from it 55 km apart. It always weighs them equally: a line of stations cannot tell north from south.</span></span></div><div><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Setup.</strong> <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> = 4, prior <em>ridgecrest</em>, press train; maps on <em>compare</em>, drag the star into each corner.</span>\n<span class=\"paragraph\"><strong>Look for.</strong> In the corners no training event fell, yet the purple regions stay as small as before and miss the star at all four.</span></span></div><div><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Setup.</strong> <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> = 4, train as it is; then mute one station at a time.</span>\n<span class=\"paragraph\"><strong>Look for.</strong> Unless it is the middle one, the purple regions miss the star although the red posterior still holds it: the mixture's spread is the data's uncertainty, not the network's.</span></span></div></marimo-accordion>"
           }
         }
       ],
       "console": []
     },
     {
-      "id": "AjVT",
+      "id": "yCnT",
       "code_hash": "555598b51bc9e6a60289d387a677648e",
       "outputs": [
         {
@@ -383,20 +474,20 @@
       "console": []
     },
     {
-      "id": "pHFh",
+      "id": "wlCL",
       "code_hash": "74919f73e476580b15ff31cdf6a17139",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='height:80vh'><div style='display: flex;flex: 1;flex-direction: column;justify-content: center;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='pHFh-0' random-id='2e935d92-1949-e3af-2748-8b9e79558043'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;da054b9ff3d343c98b92f14796869d13&quot;}' data-label='null' data-model-id='&quot;da054b9ff3d343c98b92f14796869d13&quot;'></marimo-anywidget></marimo-ui-element></div></div>"
+            "text/html": "<div style='height:80vh'><div style='display: flex;flex: 1;flex-direction: column;justify-content: center;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='wlCL-0' random-id='1420fd9e-f676-d26b-2f27-c085d0a18790'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;49c0e2aac9d74da2bbcbca4276960e37&quot;}' data-label='null' data-model-id='&quot;49c0e2aac9d74da2bbcbca4276960e37&quot;'></marimo-anywidget></marimo-ui-element></div></div>"
           }
         }
       ],
       "console": []
     },
     {
-      "id": "NCOB",
+      "id": "kqZH",
       "code_hash": "663f45792dded2ab0602f92f7130f393",
       "outputs": [
         {
@@ -409,7 +500,7 @@
       "console": []
     },
     {
-      "id": "aqbW",
+      "id": "wAgl",
       "code_hash": "600164dee4040a0256858d447a97b0cf",
       "outputs": [
         {
@@ -422,7 +513,7 @@
       "console": []
     },
     {
-      "id": "TRpd",
+      "id": "rEll",
       "code_hash": "724915db6e1079c82781f742162283e8",
       "outputs": [
         {

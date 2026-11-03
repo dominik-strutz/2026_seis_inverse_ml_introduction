@@ -88,6 +88,8 @@ def _(artifact, mo):
             ### Machine learning and inversion for seismologists
 
             #### Part 1a: locating an earthquake with gradients
+
+            https://github.com/dominik-strutz/2026_seis_inverse_ml_introduction
             """),
             artifact("title_figure", width="65%"),
         ],
