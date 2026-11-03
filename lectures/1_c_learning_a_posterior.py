@@ -28,19 +28,24 @@ app = marimo.App(
         "data:application/json;base64,eyJ0eXBlIjoic2xpZGVzIiwiZGF0YSI6eyJjZWxscyI6W"
         "3sidHlwZSI6InNraXAifSx7InR5cGUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXB"
         "lIjoic2tpcCJ9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2tpc"
-        "CJ9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0seyJ"
-        "0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiO"
-        "iJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q29kZSI6ZmF"
-        "sc2V9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0se"
-        "yJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJzbGlkZSIsInNob3dDb2R"
-        "lIjpmYWxzZX0seyJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhb"
-        "HNlfSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNraXAifSx7InR"
-        "5cGUiOiJza2lwIn0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHsidHlwZSI6I"
-        "nNraXAifSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNraXAifSx"
-        "7InR5cGUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q"
-        "29kZSI6ZmFsc2V9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJ"
-        "mcmFnbWVudCIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoic2tpcCJ9XSwiZGVjayI6eyJ0c"
-        "mFuc2l0aW9uIjoibm9uZSIsInZlcnRpY2FsQWxpZ24iOiJ0b3AifX19"
+        "CJ9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2xpZGUiLCJzaG9"
+        "3Q29kZSI6ZmFsc2V9LHsidHlwZSI6ImZyYWdtZW50Iiwic2hvd0NvZGUiOmZhbHNlfSx7InR5c"
+        "GUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoiZnJhZ21lbnQiLCJzaG93Q29"
+        "kZSI6ZmFsc2V9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJmc"
+        "mFnbWVudCIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q29kZSI6ZmF"
+        "sc2V9LHsidHlwZSI6ImZyYWdtZW50Iiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJzbGlkZ"
+        "SIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHs"
+        "idHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJza2lwIn0seyJ0eXBlI"
+        "joic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJza2l"
+        "wIn0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHsidHlwZSI6InNraXAifSx7I"
+        "nR5cGUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoic2tpcCJ9LHsidHlwZSI"
+        "6InNraXAifSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNsaWRlI"
+        "iwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2tpcCJ9LHsidHl"
+        "wZSI6InNraXAifSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q29kZSI6Z"
+        "mFsc2V9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJzbGlkZSI"
+        "sInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoiZnJhZ21lbnQiLCJzaG93Q29kZSI6ZmFsc2V9L"
+        "HsidHlwZSI6InNraXAifV0sImRlY2siOnsidHJhbnNpdGlvbiI6Im5vbmUiLCJ2ZXJ0aWNhbEF"
+        "saWduIjoidG9wIn19fQ=="
     ),
     css_file="lecture_slides.css",
     html_head_file="slides_head.html",
@@ -218,6 +223,28 @@ def _(mo, physics, posterior_rms, sample_prior, scene_from, torch):
     return (error_floor,)
 
 
+@app.cell
+def _(SEED, SummariesFigure, grid_posterior, make_scene, mo, observe, torch):
+    # one scene for the rest of the lecture: five stations on an east-west line
+    line_stations = [[10.0 + 20.0 * i, 50.0] for i in range(5)]
+    line = make_scene(line_stations, "homogeneous", SEED, sigma=0.3)
+    m_event = torch.tensor([75.0, 65.0], dtype=torch.float64)  # the event (km)
+    torch.manual_seed(3)
+    d_event = observe(line, m_event[None])  # (1, N)
+    post_event = grid_posterior(line.F, d_event[0], line.sigma, "ridgecrest")
+
+    def summaries(show):
+        """The posterior of the event with the summaries in ``show`` (same view)."""
+        figure = SummariesFigure.from_posterior(
+            post_event, m_event, line.xi_x, line.xi_y, show=show
+        )
+        # narrower than the slide, so it fits under the text without clipping
+        widget = mo.ui.anywidget(figure).style({"width": "74%", "margin": "0 auto"})
+        return widget
+
+    return line_stations, m_event, summaries
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -229,7 +256,24 @@ def _(mo):
     which point**: training minimises the expected loss $S(\hat{\mathbf{m}})$, with
     $\mathbb{E}$ the average over sources $\mathbf{m}$ drawn from the posterior.
 
-    **MSE** (mean squared error): big misses cost far more than small ones
+    Here is the posterior of one event, with the true source marked. We try three
+    losses, one after another, and see where each puts $\hat{\mathbf{m}}$.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(summaries):
+    summaries([])
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Loss 1: MSE, the mean
+
+    **Mean squared error**: big misses cost far more than small ones
 
     $$
     S(\hat{\mathbf{m}}) = \mathbb{E}\left[\lVert \mathbf{m} - \hat{\mathbf{m}}
@@ -238,9 +282,24 @@ def _(mo):
     \hat{\mathbf{m}} = \mathbb{E}[\mathbf{m}]
     $$
 
-    The **mean**. With two lobes it lands between them, where the source is not.
+    The **mean** of the posterior. With two lobes it lands between them, where the
+    source is not.
+    """)
+    return
 
-    **MAE** (mean absolute error): a miss costs in proportion to its size
+
+@app.cell(hide_code=True)
+def _(summaries):
+    summaries(["mean"])
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Loss 2: MAE, the median
+
+    **Mean absolute error**: a miss costs in proportion to its size
 
     $$
     S(\hat{\mathbf{m}}) = \mathbb{E}\left[\lVert \mathbf{m} - \hat{\mathbf{m}}
@@ -251,8 +310,22 @@ def _(mo):
 
     The **median**, of $m_x$ and $m_y$ separately: half of the posterior lies on
     either side. With two lobes it sits inside one.
+    """)
+    return
 
-    **MAP** (maximum a posteriori): no averaging. With prior density $\rho_M$ from
+
+@app.cell(hide_code=True)
+def _(summaries):
+    summaries(["mean", "median"])
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Loss 3: MAP, the peak
+
+    **Maximum a posteriori**: no averaging. With the prior density $\rho_M$ from
     before
 
     $$
@@ -264,39 +337,26 @@ def _(mo):
     $$
 
     The highest **peak** of the posterior.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(summaries):
+    summaries(["mean", "median", "map"])
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Three losses, three answers
 
     If the posterior is one symmetric peak, all three agree. For multimodal
     distributions they do not, and **none of them is wrong, they answer different
     questions**. No single point can say "it is either here or there": that needs the
     whole density, which is what we learn next.
     """)
-    return
-
-
-@app.cell
-def _(SEED, grid_posterior, make_scene, observe, torch):
-    # one scene for the rest of the lecture: five stations on an east-west line
-    line_stations = [[10.0 + 20.0 * i, 50.0] for i in range(5)]
-    line = make_scene(line_stations, "homogeneous", SEED, sigma=0.3)
-    m_event = torch.tensor([75.0, 65.0], dtype=torch.float64)  # the event (km)
-    torch.manual_seed(3)
-    d_event = observe(line, m_event[None])  # (1, N)
-    post_event = grid_posterior(line.F, d_event[0], line.sigma, "ridgecrest")
-    return line, line_stations, m_event, post_event
-
-
-@app.cell(hide_code=True)
-def _(SummariesFigure, line, m_event, mo, post_event):
-    mo.vstack(
-        [
-            mo.ui.anywidget(
-                SummariesFigure.from_posterior(
-                    post_event, m_event, line.xi_x, line.xi_y
-                )
-            )
-        ],
-        justify="center",
-    )
     return
 
 
@@ -599,7 +659,6 @@ def _(LocatorPlayground, line_stations, m_event, mo):
             stations=line_stations,
             test_event=m_event.tolist(),
             train_prior="uniform",
-            test_prior="uniform",
             n_train=1000,
             widths=[32, 32],
             lr=0.003,
@@ -669,8 +728,8 @@ def _(mo):
     batches of 64, 100 epochs and a mixture of $K$ = 1. MAP A shows the
     network's mixture for the picks of the test event (68 % and 95 % regions, each
     component with its weight). MAP B compares it with the truth: the exact
-    posterior is the green shading, the network's 68 % (solid) and 95 % (dashed)
-    regions are the orange lines on top. Each setting trains once and is kept.
+    posterior is the red shading, the network's 68 % (solid) and 95 % (dashed)
+    regions are the purple lines on top. Each setting trains once and is kept.
     """)
     return
 
@@ -698,8 +757,8 @@ def _(try_it):
                 "What does each output return for the picks of the test event?",
                 "OUTPUT *point*, then *mixture* with $K$ = 4.",
                 "*point*: one dot on the line of stations, between the two lobes of "
-                "the posterior. *mixture*: a bump in each lobe; compare the orange "
-                "regions on MAP B with the green posterior. The error is the same "
+                "the posterior. *mixture*: a bump in each lobe; compare the purple "
+                "regions on MAP B with the red posterior. The error is the same "
                 "for both (29 km, the dashed floor): it scores only the mean.",
             ),
             (
@@ -720,17 +779,17 @@ def _(try_it):
             (
                 "Shift",
                 "Does the mixture know when the network is out of its depth?",
-                "$K$ = 4, train prior *ridgecrest*, press train; then test prior "
-                "*uniform*, maps on *compare*, drag the star into each corner.",
-                "In the corners no training event fell, yet the orange regions stay "
+                "$K$ = 4, prior *ridgecrest*, press train; maps on *compare*, "
+                "drag the star into each corner.",
+                "In the corners no training event fell, yet the purple regions stay "
                 "as small as before and miss the star at all four.",
             ),
             (
                 "Shift",
                 "And when the data change in another way?",
                 "$K$ = 4, train as it is; then mute one station at a time.",
-                "Unless it is the middle one, the orange regions miss the star "
-                "although the green posterior still holds it: the mixture's spread "
+                "Unless it is the middle one, the purple regions miss the star "
+                "although the red posterior still holds it: the mixture's spread "
                 "is the data's uncertainty, not the network's.",
             ),
         ]

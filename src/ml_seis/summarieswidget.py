@@ -74,9 +74,11 @@ class SummariesFigure(anywidget.AnyWidget):
     stations = traitlets.List().tag(sync=True)
 
     @classmethod
-    def from_posterior(cls, post: Posterior, m_true, xi_x, xi_y, m_hat=None):
+    def from_posterior(cls, post: Posterior, m_true, xi_x, xi_y, m_hat=None, show=None):
         """Widget for the grid posterior ``post`` of one event at ``m_true`` (km),
-        seen by stations at (``xi_x``, ``xi_y``); ``m_hat`` adds a network's answer."""
+        seen by stations at (``xi_x``, ``xi_y``); ``m_hat`` adds a network's answer.
+        ``show`` lists the summaries to draw (keys of ``SUMMARIES``, default all);
+        the view is the same whatever is shown, so a series of widgets lines up."""
         density = post.density.numpy()
         n = density.shape[0]
         nodes = _nodes(n)
@@ -97,6 +99,8 @@ class SummariesFigure(anywidget.AnyWidget):
                  "hexagon", "#D55E00", np.asarray(m_hat, dtype=float))
             )  # fmt: skip
         lo, hi = _joint_limits(post, [mark[-1] for mark in marks])
+        if show is not None:
+            marks = [mk for mk in marks if mk[0] == "true" or mk[0] in show]
         dx = nodes[1] - nodes[0]
         truth = marks[0][-1]
         return cls(
