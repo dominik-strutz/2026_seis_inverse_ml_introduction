@@ -24,8 +24,11 @@ const BACKGROUNDS = ["P speed", "prior", "error", "posterior", "likelihood"];
 const OUTPUTS = [["point", "point"], ["mixture", "mixture"]];
 const MAXK = 8;  // mixture components
 const COST = { point: 1, mixture: 2 };  // training time relative to point
-const NET_INK = "#8a3c00";  // contours of the network's posterior
-const EXACT_INK = "#00573f";  // contours of the exact posterior
+// Colours follow the course convention: prior blue, likelihood green, posterior red
+// (vermillion); the network's own answer is reddish purple.
+const POST = "#D55E00", POST_INK = "#9c4300";  // exact posterior: shading, contours
+const LIKE_INK = "#007a58";                     // likelihood: contours
+const NET = "#CC79A7", NET_INK = "#9a4a7c";     // the network: marks, contours
 const R95 = Math.sqrt(5.991);  // 95 % of a 2D Gaussian: 2.45 sigma
 const VELOCITIES = [["homogeneous", "homogeneous"], ["heterogeneous", "heterogeneous"]];
 const FIELDS = [1, 2, 3, 4, 5, 6];
@@ -36,12 +39,14 @@ const N_TRAINS = [10, 30, 100, 300, 1000, 3000, 10000, 30000];
 const ACTS = ["ReLU", "tanh", "sigmoid", "linear"];
 const LRS = [1e-4, 3e-4, 1e-3, 3e-3, 0.01, 0.03, 0.1];
 const BATCHES = [[0, "all"], [16, "16"], [32, "32"], [64, "64"], [128, "128"], [256, "256"]];
-const EPOCHS = [30, 60, 100, 150, 300, 1000, 2000];
+const EPOCHS = [30, 60, 100, 150, 300, 1000, 2000, 5000, 10000];
 const DURATIONS = [1, 2, 4, 8, 16];  // seconds for one playback
 const AUTO_MAX = 4;  // seconds: automatic retraining is skipped for slower runs
 const WIDTHS = [1, 2, 4, 8, 16, 32, 64, 128];  // choices for a hidden layer
 const MAXL = 4;  // hidden layers
 const ERR_MAX = 10;  // km at the top of the error colour bar
+const ERR_LOG = [0.3, 30];  // km at the ends of the log error colour bar
+const ERR_TICKS = [0.3, 1, 3, 10, 30];  // km labelled on the log bar
 const ERR_STOPS = [[255, 247, 236], [253, 212, 158], [252, 141, 89], [215, 48, 31],
   [127, 0, 0]];
 
@@ -50,7 +55,7 @@ const ERR_STOPS = [[255, 247, 236], [253, 212, 158], [252, 141, 89], [215, 48, 3
 const TRAIN_KEYS = ["stations", "muted", "velocity", "field", "sigma", "train_prior",
   "n_train", "widths", "activation", "optimiser", "lr", "batch_size", "epochs",
   "normalise", "output", "n_components"];
-const SCENE_KEYS = ["stations", "muted", "velocity", "field", "sigma", "test_prior"];
+const SCENE_KEYS = ["stations", "muted", "velocity", "field", "sigma"];
 
 const LOCAL_CSS = `
 .loc-train { font: 600 13px ${FONT}; letter-spacing: 0.06em; height: 46px;
@@ -115,6 +120,12 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const fin = (v) => typeof v === "number" && Number.isFinite(v);
 const fmtKm = (v) => (fin(v) ? (v < 10 ? v.toFixed(2) : v.toFixed(1)) : "—");
 
+function errFrac(e, log) {  // error in km -> 0..1 along the colour bar
+  if (!log) return e / ERR_MAX;
+  const [a, b] = ERR_LOG.map(Math.log10);
+  return (Math.log10(Math.max(e, 1e-6)) - a) / (b - a);
+}
+
 function errColour(f) {  // 0..1 -> [r, g, b], white to dark red
   if (!Number.isFinite(f)) f = 1;
   const x = Math.min(Math.max(f, 0), 1) * (ERR_STOPS.length - 1);
@@ -141,9 +152,13 @@ function render({ model, el }) {
   let drag = null, live = null, hover = null, scrubbing = false;
   let waitScene = false, waitEvent = false;  // edits sent, Python not back yet
   const showOutput = model.get("show_output");
-  const backgrounds = showOutput ? [...BACKGROUNDS, "network", "compare"] : BACKGROUNDS;
+  // a mixture answers with a density, which the error map (distance of one answer from
+  // the source) does not score: no error map with the OUTPUT controls
+  const backgrounds = showOutput
+    ? [...BACKGROUNDS.filter((b) => b !== "error"), "network", "compare"] : BACKGROUNDS;
   const maps = model.get("backgrounds").slice(0, 2).map((bg, i) => (
-    { ...MAPS[i], bg: backgrounds.includes(bg) ? bg : "P speed", arrows: false }));
+    { ...MAPS[i], bg: backgrounds.includes(bg) ? bg : "P speed", arrows: false, log: false,
+    marks: { prior: { train: true, test: true }, error: { train: false, test: false } } }));
   const isEventBg = (bg) => bg === "posterior" || bg === "likelihood" || bg === "network"
     || bg === "compare";
   // the network's mixture is the answer (no point, no noise draws to show)
@@ -241,8 +256,7 @@ function render({ model, el }) {
       [field("sigma", "PICK NOISE", opts(SIGMAS), "σ", "s")]),
     panel("DATA",
       [field("n_train", "TRAINING EVENTS", opts(N_TRAINS)),
-        field("train_prior", "TRAIN PRIOR", PRIOR_NAMES)],
-      [field("test_prior", "TEST PRIOR", PRIOR_NAMES)]),
+        field("train_prior", "PRIOR", PRIOR_NAMES)]),
     panel("NETWORK",
       [uiField(uiLabel("HIDDEN LAYERS"), layerBox),
         field("activation", "ACTIVATION", ACTS.map((a) => [a, a]), "φ"),
@@ -275,6 +289,25 @@ function render({ model, el }) {
     b.onclick = () => { maps[i].arrows = !maps[i].arrows; syncHeads(); draw(); };
     return b;
   });
+  const logTgl = [0, 1].map((i) => {
+    const b = elt("button", "loc-toggle", "log");
+    b.title = "colour the error on a log scale, to see small values";
+    b.onclick = () => { maps[i].log = !maps[i].log; syncHeads(); draw(); };
+    return b;
+  });
+  // training and test events on the prior and error maps (one pair of buttons per map
+  // and background, so each background remembers its own choice)
+  const markTgl = [0, 1].map((i) => ["prior", "error"].map((bg) => {
+    const pair = ["train", "test"].map((kind) => {
+      const b = elt("button", "loc-toggle", kind);
+      b.title = `show the ${kind} events`;
+      b.onclick = () => {
+        const mk = maps[i].marks[bg]; mk[kind] = !mk[kind]; syncHeads(); draw();
+      };
+      return b;
+    });
+    return pair;
+  }));
   const pickers = maps.map((m, i) => {
     const s = uiSelect(backgrounds.map((b) => [b, b]), m.bg, (v) => {
       m.bg = v; syncHeads(); draw();
@@ -282,6 +315,9 @@ function render({ model, el }) {
     put(elt("div", "mls-head", i ? "MAP B" : "MAP A"), m.l, 6);
     put(s, m.l + 62, 2);
     put(arrowTgl[i], m.l + 190, 2);
+    put(logTgl[i], m.l + 250, 2);
+    markTgl[i][0].forEach((b, k) => put(b, m.l + 190 + 48 * k, 2));
+    markTgl[i][1].forEach((b, k) => put(b, m.l + 300 + 48 * k, 2));
     return s;
   });
   function syncHeads() {
@@ -289,6 +325,12 @@ function render({ model, el }) {
       pickers[i].set(m.bg);
       arrowTgl[i].style.display = m.bg === "error" ? "" : "none";
       arrowTgl[i].classList.toggle("mls-on", m.arrows);
+      logTgl[i].style.display = m.bg === "error" ? "" : "none";
+      logTgl[i].classList.toggle("mls-on", m.log);
+      ["prior", "error"].forEach((bg, j) => markTgl[i][j].forEach((b, k) => {
+        b.style.display = m.bg === bg ? "" : "none";
+        b.classList.toggle("mls-on", m.marks[bg][k ? "test" : "train"]);
+      }));
     });
   }
   put(elt("div", "mls-head", "LOCATION ERROR (km)"), LOSS.l - 24, 6);
@@ -591,7 +633,7 @@ function render({ model, el }) {
     return images[layer.png];
   }
   const errCanvas = document.createElement("canvas");
-  function errorImage(gp) {
+  function errorImage(gp, log) {
     const n = model.get("n_grid");
     errCanvas.width = n; errCanvas.height = n;
     const g = errCanvas.getContext("2d"), im = g.createImageData(n, n);
@@ -600,24 +642,25 @@ function render({ model, el }) {
       const x = lo + (hi - lo) * i / (n - 1), y = lo + (hi - lo) * j / (n - 1);
       const k = j * n + i;
       const e = Math.hypot(gp[2 * k] - x, gp[2 * k + 1] - y);
-      const [r, gg, b] = errColour(e / ERR_MAX);
+      const [r, gg, b] = errColour(errFrac(e, log));
       const p = 4 * ((n - 1 - j) * n + i);  // image rows run top down
       im.data[p] = r; im.data[p + 1] = gg; im.data[p + 2] = b; im.data[p + 3] = 255;
     }
     g.putImageData(im, 0, 0);
     return errCanvas;
   }
-  function colourBar(map, drawBar, lo, hi, label, ticks) {
+  function colourBar(map, drawBar, lo, hi, label, ticks, labels) {
     const bx = map.l + P + 10, bw = 10, by = map.t, bh = P;
     drawBar(bx, by, bw, bh);
     ctx.strokeStyle = C.ink2; ctx.lineWidth = 0.8; ctx.strokeRect(bx, by, bw, bh);
     const ts = ticks || [lo, (lo + hi) / 2, hi];
-    for (const v of ts) {
+    ts.forEach((v, k) => {
       const f = (v - lo) / (hi - lo), y = by + bh * (1 - f);
-      const s = Math.abs(v) >= 10 || Number.isInteger(v) ? String(+v.toFixed(1)) : v.toFixed(1);
+      const s = labels ? labels[k]
+        : Math.abs(v) >= 10 || Number.isInteger(v) ? String(+v.toFixed(1)) : v.toFixed(1);
       text(s, bx + bw + 4, y + (f <= 0 ? 0 : f >= 1 ? 8 : 4));
       ctx.beginPath(); ctx.moveTo(bx + bw, y); ctx.lineTo(bx + bw - 3, y); ctx.stroke();
-    }
+    });
     ctx.save(); ctx.translate(bx + bw + 34, by + bh / 2); ctx.rotate(Math.PI / 2);
     text(label, 0, 0, "center", C.ink2, 11); ctx.restore();
   }
@@ -635,7 +678,7 @@ function render({ model, el }) {
     if (map.bg === "error") {
       if (gp) {
         ctx.imageSmoothingEnabled = true;
-        ctx.drawImage(errorImage(gp), map.l, map.t, P, P);
+        ctx.drawImage(errorImage(gp, map.log), map.l, map.t, P, P);
       } else { ctx.fillStyle = "#f3f4f6"; ctx.fillRect(map.l, map.t, P, P); }
       ctx.globalAlpha = 1;
       colourBar(map, (bx, by, bw, bh) => {
@@ -643,7 +686,9 @@ function render({ model, el }) {
           const [r, g, b] = errColour(1 - k / bh);
           ctx.fillStyle = `rgb(${r},${g},${b})`; ctx.fillRect(bx, by + k, bw, 1.5);
         }
-      }, 0, ERR_MAX, "error of the network (km)", [0, 5, 10]);
+      }, 0, 1, "error of the network (km)", map.log
+        ? ERR_TICKS.map((v) => errFrac(v, true)) : [0, 0.5, 1],
+      map.log ? ERR_TICKS.map(String) : ["0", "5", "10"]);
       return;
     }
     if (map.bg === "P speed" && layer?.constant) {  // nothing to colour
@@ -688,31 +733,43 @@ function render({ model, el }) {
     for (const r of e.rays) if (r) polyline(r);
     ctx.globalAlpha = 1;
   }
+  // the training events (dark dots) and the test events (open rings) on a map
+  function drawEvents(map, marks, sView, r) {
+    // dot size follows the number drawn: few events get big dots, many small ones
+    const train = marks.train && r.train_events ? r.train_events : [];
+    const test = marks.test && sView.test_true && !waitScene ? sView.test_true : [];
+    const rad = Math.min(5, Math.max(2.2, 45 / Math.sqrt(Math.max(train.length, 1))));
+    const dark = "rgba(17,17,17,0.85)", rim = "rgba(255,255,255,0.8)";
+    for (const p of train) {  // dark dots with a light rim, visible on any background
+      const [x, y] = toPx(p);
+      dot(x, y, rad, dark, rim, 0.8);
+    }
+    const ring = (x, y, r0) => {  // dark ring on a white halo
+      ctx.beginPath(); ctx.arc(x, y, r0, 0, 7);
+      ctx.lineWidth = 3; ctx.strokeStyle = rim; ctx.stroke();
+      ctx.lineWidth = 1.3; ctx.strokeStyle = C.ink; ctx.stroke();
+    };
+    for (const p of test) { const [x, y] = toPx(p); ring(x, y, 3.2); }
+    const items = [train.length && "training", test.length && "test"].filter(Boolean);
+    if (!items.length) return;
+    const lx = map.l + 8, ly = map.t + P - 4 - 13 * items.length;  // legend
+    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    ctx.fillRect(lx - 4, ly - 12, 70, 13 * items.length + 8);
+    items.forEach((name, k) => {
+      const y = ly + 13 * k;
+      if (name === "training") dot(lx + 3, y - 2, 3, dark, rim, 0.8);
+      else ring(lx + 3, y - 2, 3.2);
+      text(name, lx + 12, y + 1, "left", C.ink, 10);
+    });
+  }
   function drawMap(map) {
     cur = map;
     const s = scene(), r = run(), sView = sv();
     const gp = sView.ok && !trainPending() ? frameOf(sView.grid_pred) : null;
     drawBackground(map, gp);
     ctx.save(); ctx.beginPath(); ctx.rect(map.l, map.t, P, P); ctx.clip();
-    if (map.bg === "prior" && r.train_events) {  // where the training events were
-      for (const p of r.train_events) {  // dark dots with a light rim, visible on any blue
-        const [x, y] = toPx(p);
-        dot(x, y, 1.7, "rgba(17,17,17,0.8)", "rgba(255,255,255,0.7)", 0.7);
-      }
-      if (sView.test_true && !waitScene) {  // the test events: open rings
-        ctx.lineWidth = 1; ctx.strokeStyle = C.orange;
-        for (const p of sView.test_true) {
-          const [x, y] = toPx(p); ctx.beginPath(); ctx.arc(x, y, 2.6, 0, 7); ctx.stroke();
-        }
-      }
-      const ly = map.t + P - 30, lx = map.l + 8;  // legend
-      ctx.fillStyle = "rgba(255,255,255,0.85)"; ctx.fillRect(lx - 4, ly - 12, 92, 38);
-      dot(lx + 3, ly - 2, 1.7, "rgba(17,17,17,0.8)", "rgba(255,255,255,0.7)", 0.7);
-      text("training", lx + 12, ly + 1, "left", C.ink, 10);
-      ctx.lineWidth = 1; ctx.strokeStyle = C.orange;
-      ctx.beginPath(); ctx.arc(lx + 3, ly + 13, 2.6, 0, 7); ctx.stroke();
-      text("test", lx + 12, ly + 16, "left", C.ink, 10);
-    }
+    const marks = map.marks[map.bg];
+    if (marks) drawEvents(map, marks, sView, r);
     if (map.bg === "P speed") drawRays();
     if (map.bg === "error" && map.arrows && gp) {  // from each true source to m̂
       const n = model.get("n_grid"), lo = 2, hi = box() - 2;
@@ -790,7 +847,7 @@ function render({ model, el }) {
       text("y (km)", 0, 0, "center"); ctx.restore();
     }
   }
-  // the posterior's 68 % and 95 % regions and its mean (the network's in dark orange)
+  // the posterior's 68 % and 95 % regions and its mean (the network's in purple)
   function drawRegions(layer, ink, lws, halo = false) {
     ctx.lineJoin = "round";
     for (const [lev, dash, lw] of [["95", [4, 3], lws[1]], ["68", [], lws[0]]]) {
@@ -806,16 +863,17 @@ function render({ model, el }) {
   function drawPosteriorMarks(post, bg) {
     if (!post || waitEvent || drag) return;
     if (bg === "compare") {  // exact posterior shaded underneath, the network on top
-      drawRegions(post, EXACT_INK, [1, 0.8]);
+      drawRegions(post, POST_INK, [1, 0.8]);
       const learned = ev().learned;
-      if (learned) drawRegions(learned, C.orange, [2.2, 1.8], true);
+      if (learned) drawRegions(learned, NET, [2.2, 1.8], true);
       return;
     }
     const net = bg === "network";
-    drawRegions(post, net ? NET_INK : EXACT_INK, [1.6, 1.2]);
-    if (net) return;  // the network's mean is its answer, the orange dot
+    const ink = net ? NET_INK : bg === "likelihood" ? LIKE_INK : POST_INK;
+    drawRegions(post, ink, [1.6, 1.2]);
+    if (net) return;  // the network's mean is its answer, the purple dot
     const [mx, my] = toPx(post.mean);
-    diamond(mx, my, 6, C.green);
+    diamond(mx, my, 6, ink);
   }
   // the components of a mixture: one 95 % ellipse each, with its weight
   function drawNetworkMarks(map, post) {
@@ -844,7 +902,7 @@ function render({ model, el }) {
       cloud = frameOf(eView.cloud);
       if (cloud && !cloud.every((p) => fin(p[0]) && fin(p[1]))) cloud = null;  // diverged
       if (cloud && !mixtureOut()) {
-        ctx.fillStyle = "rgba(213,94,0,0.45)";
+        ctx.fillStyle = "rgba(204,121,167,0.55)";
         for (const p of cloud) { const [x, y] = toPx(p); ctx.beginPath(); ctx.arc(x, y, 2, 0, 7); ctx.fill(); }
         drawEllipse(cloud);
         hat = cloud[0];
@@ -852,9 +910,9 @@ function render({ model, el }) {
     } else if (gp && drag?.kind === "event" && !mixtureOut()) hat = gridLookup(gp, event);
     if (hat) {
       const [hx, hy] = toPx(hat);
-      ctx.strokeStyle = C.orange; ctx.lineWidth = 1.2;
+      ctx.strokeStyle = NET; ctx.lineWidth = 1.2;
       ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(hx, hy); ctx.stroke();
-      dot(hx, hy, 5.5, C.orange);
+      dot(hx, hy, 5.5, NET);
     }
     star(ex, ey, view ? 8 : 10, "#111");
     return cloud;
@@ -913,7 +971,7 @@ function render({ model, el }) {
     const [cx, cy] = toPx([mx, my]);
     ctx.save(); ctx.translate(cx, cy); ctx.rotate(-ang);
     ctx.beginPath(); ctx.ellipse(0, 0, Math.sqrt(l1) * k, Math.sqrt(l2) * k, 0, 0, 7);
-    ctx.strokeStyle = C.orange; ctx.lineWidth = 1.2; ctx.setLineDash([3, 2]); ctx.stroke();
+    ctx.strokeStyle = NET_INK; ctx.lineWidth = 1.2; ctx.setLineDash([3, 2]); ctx.stroke();
     ctx.setLineDash([]); ctx.restore();
   }
 
@@ -934,15 +992,15 @@ function render({ model, el }) {
     const has = (...bgs) => maps.some((m) => bgs.includes(m.bg));
     item((a, b) => star(a, b, 7, "#111"), "test event");
     if (!mixtureOut()) {
-      item((a, b) => dot(a, b, 4.5, C.orange), "network");
-      item((a, b) => { ctx.fillStyle = "rgba(213,94,0,0.6)"; for (const [u, v] of [[-4, 1], [0, -3], [3, 2]]) ctx.fillRect(a + u, b + v, 2, 2); }, "64 noise draws");
+      item((a, b) => dot(a, b, 4.5, NET), "network");
+      item((a, b) => { ctx.fillStyle = "rgba(204,121,167,0.8)"; for (const [u, v] of [[-4, 1], [0, -3], [3, 2]]) ctx.fillRect(a + u, b + v, 2, 2); }, "64 noise draws");
     }
     if (has("posterior", "likelihood"))
-      item((a, b) => diamond(a, b, 5, C.green), "posterior mean");
+      item((a, b) => diamond(a, b, 5, POST_INK), "posterior mean");
     if (has("compare")) {
-      item((a, b) => { ctx.fillStyle = "#8fd0b5"; ctx.fillRect(a - 7, b - 5, 14, 10); }, "exact posterior");
-      if (mixtureOut()) item(line(C.orange, 2.2), "network 68 %");
-      if (mixtureOut()) item(line(C.orange, 1.8, [4, 3]), "95 %");
+      item((a, b) => { ctx.fillStyle = "#f0b48a"; ctx.fillRect(a - 7, b - 5, 14, 10); }, "exact posterior");
+      if (mixtureOut()) item(line(NET, 2.2), "network 68 %");
+      if (mixtureOut()) item(line(NET, 1.8, [4, 3]), "95 %");
     }
     item((a, b) => triangle(a, b, 4.5, "#fff"), "station");
     item((a, b) => { ctx.strokeStyle = "rgba(17,17,17,0.7)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(a - 7, b); ctx.lineTo(a + 7, b); ctx.stroke(); }, "ray");
@@ -954,14 +1012,14 @@ function render({ model, el }) {
 
   // what differs from the training: the data (scene) and the settings of the network
   const SCENE_ONLY = ["stations", "muted", "velocity", "field", "sigma"];
-  const NAMES = { n_train: "training events", train_prior: "train prior", widths: "widths",
+  const NAMES = { n_train: "training events", train_prior: "prior", widths: "widths",
     lr: "step size", batch_size: "batch", normalise: "rescale",
     output: "output", n_components: "components K" };
   function differences() {
     const c = model.get("trained");
     if (!c || !c.stations) return [];
     const out = [], s = model.get("stations");
-    // in automatic mode the network follows every change, so only the test prior can differ
+    // in automatic mode the network follows every change
     if (!(auto && estSeconds() <= AUTO_MAX)) {
       if (s.length !== c.stations.length) out.push(`${s.length} stations (trained: ${c.stations.length})`);
       else {
@@ -974,10 +1032,6 @@ function render({ model, el }) {
       if (vNow !== c.velocity || (vNow === "heterogeneous" && fNow !== c.field))
         out.push(`P speed ${vNow === "heterogeneous" ? `field ${fNow}` : "constant"} (trained: ${c.velocity === "heterogeneous" ? `field ${c.field}` : "constant"})`);
       if (model.get("sigma") !== c.sigma) out.push(`σ = ${model.get("sigma")} s (trained: ${c.sigma} s)`);
-    }
-    if (model.get("test_prior") !== c.train_prior)
-      out.push(`test events from the ${model.get("test_prior")} prior`);
-    if (!(auto && estSeconds() <= AUTO_MAX)) {
       const retrain = TRAIN_KEYS.filter((k) => !SCENE_ONLY.includes(k) && !same(model.get(k), c[k]));
       if (retrain.length) {
         const names = retrain.map((k) => NAMES[k] || k).join(", ");
@@ -1024,24 +1078,27 @@ function render({ model, el }) {
 
   // ---- learning curves ------------------------------------------------------------------
   function drawLoss() {
-    const r = run(), tr = r.rms_train || [], va = r.rms_val || [];
-    const { l, t, w, h } = LOSS;
+    const r = run(), { l, t, w, h } = LOSS;
+    // a short moving average in log space keeps the curves smooth and easy to read; the
+    // untrained start (epoch 0) stays as it is and the window shrinks at the last epoch
+    const nRaw = (r.rms_train || []).length;
+    const half = Math.min(Math.round(nRaw / 60), 4);
+    const smooth = (vals = []) => vals.map((v, k) => {
+      if (k === 0) return v;
+      const win = vals.slice(Math.max(k - half, 1), k + half + 1);
+      return win.every((u) => u > 0 && fin(u))
+        ? 10 ** (win.reduce((a, u) => a + Math.log10(u), 0) / win.length) : v;
+    });
+    const tr = smooth(r.rms_train), va = smooth(r.rms_val);
     ctx.strokeStyle = C.ink2; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(l, t + h); ctx.lineTo(l + w, t + h); ctx.stroke();
     const n = Math.max(tr.length - 1, 1), nTotal = r.config ? r.config.epochs : n;
-    const ok = [...tr, ...va, r.floor].filter((v) => v > 0 && fin(v));
+    // the axis shows both curves in full, from the untrained start to the last epoch
+    // (a diverged run is cut at 1000 km)
+    const ok = [...tr, ...va, r.floor].filter((v) => v > 0 && fin(v) && v <= 1000);
     if (!ok.length) return;
-    // the first epochs start far above the rest and would stretch the axis: the limits come
-    // from the curves after the first fifth of the epochs (the start runs off the top), the
-    // lower one just below the training loss (the best possible line may fall outside)
-    const skip = Math.ceil(0.2 * tr.length);
-    const fit = (vals) => vals.slice(skip).filter((v) => v > 0 && fin(v));
-    const rest = [...fit(tr), ...fit(va)];
-    const trainRest = fit(tr);
-    const low = trainRest.length ? Math.min(...trainRest) : Math.min(...ok);
-    const top = rest.length ? Math.max(...rest, r.floor > 0 ? r.floor : 0) : Math.max(...ok);
-    const lo = Math.log10(Math.min(low, ...(rest.length ? rest : ok))) - 0.04;
-    const hi = Math.log10(Math.min(top, 300)) + 0.06;
+    const lo = Math.log10(Math.min(...ok)) - 0.04;
+    const hi = Math.log10(Math.max(...ok)) + 0.06;
     const X = (k) => l + k / nTotal * w;
     const Y = (v) => t + h - (Math.log10(Math.min(Math.max(v, 1e-6), 1e6)) - lo) / (hi - lo) * h;
     const ticks = [];
@@ -1052,7 +1109,7 @@ function render({ model, el }) {
       ctx.beginPath(); ctx.moveTo(l, Y(v)); ctx.lineTo(l + w, Y(v)); ctx.stroke();
       text(String(v), l - 6, Y(v) + 4, "right", C.ink, 10);
     }
-    const dx = [1, 2, 5, 10, 25, 50, 100, 250, 500, 1000].find((d) => nTotal / d <= 5) || 1000;
+    const dx = [1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500].find((d) => nTotal / d <= 5) || 5000;
     for (let k = 0; k <= nTotal; k += dx) text(String(k), X(k), t + h + 14, "center", C.ink, 10);
     text("epoch", l + w / 2, t + h + 28, "center", C.ink2, 10.5);
     ctx.save(); ctx.beginPath(); ctx.rect(l, t - 4, w + 4, h + 8); ctx.clip();
@@ -1115,7 +1172,7 @@ function render({ model, el }) {
       }
       if (!pred) return;
       ctx.save(); ctx.beginPath(); ctx.rect(l, t, sz, sz); ctx.clip();
-      ctx.fillStyle = "rgba(213,94,0,0.55)";
+      ctx.fillStyle = "rgba(204,121,167,0.7)";
       pred.forEach((p, i) => {
         if (!fin(p[c])) return;
         ctx.beginPath(); ctx.arc(X(s.test_true[i][c]), Y(p[c]), 1.8, 0, 7); ctx.fill();

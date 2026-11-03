@@ -44,10 +44,11 @@ def png_data_url(rgba: np.ndarray) -> str:
 
 def colour_layer(values, lo, hi, cmap, label, ticks=None) -> dict:
     """A map background for the widgets: ``values`` (ny, nx) coloured between ``lo``
-    and ``hi`` with a matplotlib colormap, plus a colour bar image and its labels."""
+    and ``hi`` with a matplotlib colormap (a name or a colormap object), plus a colour
+    bar image and its labels."""
     import matplotlib
 
-    cm = matplotlib.colormaps[cmap]
+    cm = matplotlib.colormaps[cmap] if isinstance(cmap, str) else cmap
     scaled = np.clip((np.asarray(values) - lo) / (hi - lo), 0, 1)
     layer = {
         "png": png_data_url(cm(scaled)),

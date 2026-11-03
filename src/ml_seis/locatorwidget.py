@@ -38,6 +38,7 @@ import anywidget
 import numpy as np
 import torch
 import traitlets
+from matplotlib.colors import LinearSegmentedColormap
 from torch import nn
 
 from .density_plotting import mixture_components
@@ -59,7 +60,12 @@ N_GRID = 25  # true sources per side for the error map and the drag lookup
 GRID_NODES = torch.linspace(2.0, BOX - 2.0, N_GRID, dtype=torch.float64)
 N_SNAPSHOTS = 30  # weight snapshots kept for the playback
 N_DEFAULT_STATIONS = 5  # stations the playground opens with
-N_TEST = 200  # test events from the test prior
+# course colours: posterior red (vermillion), likelihood green, network reddish purple
+_RAMP = LinearSegmentedColormap.from_list
+POSTERIOR_CMAP = _RAMP("posterior", ["#ffffff", "#D55E00"])
+LIKELIHOOD_CMAP = _RAMP("likelihood", ["#ffffff", "#009E73"])
+NETWORK_CMAP = _RAMP("network", ["#ffffff", "#CC79A7"])
+N_TEST = 200  # test events, drawn from the prior the network was trained on
 N_DRAWS = 64  # noise draws of the dragged test event
 RAY_POINTS = 4  # every this many points of a traced ray are sent
 
@@ -88,7 +94,6 @@ DEFAULTS = {
     "field": SEED,
     "sigma": 0.3,
     "train_prior": "uniform",
-    "test_prior": "uniform",
     "n_train": 1000,
     "widths": [16, 16],
     "activation": "tanh",
@@ -182,7 +187,7 @@ def _speed_layer(velocity: Velocity):
     return layer
 
 
-def _posterior_layer(post, label, cmap="Greens"):
+def _posterior_layer(post, label, cmap=POSTERIOR_CMAP):
     """A grid posterior as a colour layer with its 68 % and 95 % contours and mean."""
     import contourpy
 
@@ -248,7 +253,7 @@ def _learned_layer(posterior_of, d):
         log_q = posterior_of(d.expand(len(m), -1)).log_prob(m.float())
         q = posterior_of(d)
     layer = _posterior_layer(
-        posterior_from_log(log_q, N_POST), "network / max", "Oranges"
+        posterior_from_log(log_q, N_POST), "network / max", NETWORK_CMAP
     )
     layer["components"] = _components(q)
     return layer
@@ -279,7 +284,6 @@ class LocatorPlayground(anywidget.AnyWidget):
     field = traitlets.Int(DEFAULTS["field"]).tag(sync=True)
     sigma = traitlets.Float(DEFAULTS["sigma"]).tag(sync=True)  # pick noise (s)
     train_prior = traitlets.Unicode(DEFAULTS["train_prior"]).tag(sync=True)
-    test_prior = traitlets.Unicode(DEFAULTS["test_prior"]).tag(sync=True)
     n_train = traitlets.Int(DEFAULTS["n_train"]).tag(sync=True)
     # the network and its training (JS -> Python)
     widths = traitlets.List(DEFAULTS["widths"]).tag(sync=True)
@@ -370,7 +374,6 @@ class LocatorPlayground(anywidget.AnyWidget):
             self.velocity,
             self.field,
             self.sigma,
-            self.test_prior,
         ]
         if self._changed("run", [config, self.train_id]):
             self._send_run(run, floor)
@@ -421,7 +424,7 @@ class LocatorPlayground(anywidget.AnyWidget):
             )
             return view
         torch.manual_seed(1)
-        m_test = sample_prior(self.test_prior, N_TEST)
+        m_test = sample_prior(run.config["train_prior"], N_TEST)
         d_test = observe(now, m_test)
         m_grid = torch.cartesian_prod(GRID_NODES, GRID_NODES).flip(1)  # x runs fastest
         tic = time.perf_counter()
@@ -458,7 +461,9 @@ class LocatorPlayground(anywidget.AnyWidget):
             "rays": _rays(now, m_event),
             "rays_assumed": _rays(assumed, m_event) if wrong_model else None,
             "posterior": _posterior_layer(posterior, "posterior / max"),
-            "likelihood": _posterior_layer(likelihood, "likelihood / max"),
+            "likelihood": _posterior_layer(
+                likelihood, "likelihood / max", LIKELIHOOD_CMAP
+            ),
         }
         if fits:
             view["cloud"] = _r(

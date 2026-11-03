@@ -21,7 +21,7 @@
 
 import marimo
 
-__generated_with = "0.25.1"
+__generated_with = "0.25.2"
 app = marimo.App(
     width="full",
     layout_file=(
@@ -843,7 +843,8 @@ def _(mo):
 
     - **Scene.** Stations (+ / −; drag to move, double-click empty ground to add one,
       shift-click to mute a dead one), P-speed model and pick noise $\sigma$.
-    - **Data.** Number of training events, training and test prior.
+    - **Data.** Number of training events and the prior they are drawn from (the test
+      events come from the same prior).
     - **Network.** Hidden layers, one width per layer, activation.
     - **Training.** Optimiser, step size $\eta$, batch size, epochs and *rescale*.
 
@@ -853,10 +854,12 @@ def _(mo):
     a new one. Runs that would take more than a few seconds always wait for the button.
 
     **Two maps** share the scene; each shows a background of your choice: the P speed
-    (with the **rays** from the test event), the prior (with the training events), the
-    **error** of the network for a source anywhere (*arrows* show where its answers are
-    pulled), or the **posterior** or **likelihood** of the test event (68 % and 95 %
-    regions, ◆ its mean). **Drag the test event** (star): the orange dot is the
+    (with the **rays** from the test event), the prior, the **error** of the network
+    for a source anywhere (*arrows* show where its answers are pulled, *log* colours
+    it on a log scale so small errors show), or the **posterior** or **likelihood** of
+    the test event (68 % and 95 % regions, ◆ its mean). On the prior and the error map
+    the *train* and *test* buttons show the training events (dots) and the test events
+    (rings). **Drag the test event** (star): the purple dot is the
     network's answer, the small dots are its answers for 64 noise draws of the same
     event. The network you chose is drawn under the playground: the learned weights, or
     the initial weights (grey) while a retraining is pending.
@@ -929,8 +932,7 @@ def _(try_it):
             (
                 "Shift",
                 "Where on the map can you trust the network?",
-                "Training prior *ridgecrest*, test prior *uniform*; one map on "
-                "*error*, the other on *prior*.",
+                "Prior *ridgecrest*; one map on *error*, the other on *prior*.",
                 "Good where the training events were, poor in the corners.",
             ),
             (
