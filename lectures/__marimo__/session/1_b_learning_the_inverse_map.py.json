@@ -77,7 +77,7 @@
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='zoom:0.7'><marimo-ui-element object-id='PKri-0' random-id='3c1c1bbb-ad79-5e3c-0193-14c19c477d1a'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;ea67cc90d9b2463dad3224eb4fc7d3dc&quot;}' data-label='null' data-model-id='&quot;ea67cc90d9b2463dad3224eb4fc7d3dc&quot;'></marimo-anywidget></marimo-ui-element></div>"
+            "text/html": "<div style='zoom:0.7'><marimo-ui-element object-id='PKri-0' random-id='3007413b-5716-6d1b-ca0a-6a351559947a'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;311e42e997954af0af8dc763c655d4b6&quot;}' data-label='null' data-model-id='&quot;311e42e997954af0af8dc763c655d4b6&quot;'></marimo-anywidget></marimo-ui-element></div>"
           }
         }
       ],
@@ -116,7 +116,7 @@
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='Xref-0' random-id='1e1e110f-dd53-2cf9-353d-691f5e46cf5b'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;4b5e876b19194c42b9cec1a330c05663&quot;}' data-label='null' data-model-id='&quot;4b5e876b19194c42b9cec1a330c05663&quot;'></marimo-anywidget></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"four-things-to-look-for\">Four things to look for</h3>\n<ul>\n<li><strong>Flexibility.</strong> What do width, depth and the activation each add to the curve a\n  network can draw?</li>\n<li><strong>Initialisation.</strong> Does the same network always find the same fit?</li>\n<li><strong>Held-out points.</strong> What do the validation points show that the train loss\n  cannot?</li>\n<li><strong>Data.</strong> How many points before the two losses agree?</li>\n</ul></span></div>"
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='Xref-0' random-id='1520f810-fc04-74e9-3414-dfdaf0bf5f9e'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;cebd0122bef94831b363d4d4a9bbddcb&quot;}' data-label='null' data-model-id='&quot;cebd0122bef94831b363d4d4a9bbddcb&quot;'></marimo-anywidget></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"four-things-to-look-for\">Four things to look for</h3>\n<ul>\n<li><strong>Flexibility.</strong> What do width, depth and the activation each add to the curve a\n  network can draw?</li>\n<li><strong>Initialisation.</strong> Does the same network always find the same fit?</li>\n<li><strong>Held-out points.</strong> What do the validation points show that the train loss\n  cannot?</li>\n<li><strong>Data.</strong> How many points before the two losses agree?</li>\n</ul></span></div>"
           }
         }
       ],
@@ -532,7 +532,7 @@
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='kqZH-0' random-id='83a4918c-50c6-dbd4-8625-3f8b6022c415'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;6bc89f0d08af4b2fabfbbca4e2e30718&quot;}' data-label='null' data-model-id='&quot;6bc89f0d08af4b2fabfbbca4e2e30718&quot;'></marimo-anywidget></marimo-ui-element></div>"
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='kqZH-0' random-id='d591b93c-7115-1c26-3173-188c85edac56'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;1a3b67e2b778465598192d444083e5e1&quot;}' data-label='null' data-model-id='&quot;1a3b67e2b778465598192d444083e5e1&quot;'></marimo-anywidget></marimo-ui-element></div>"
           }
         }
       ],

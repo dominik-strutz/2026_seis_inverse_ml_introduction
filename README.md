@@ -7,6 +7,7 @@ A short introduction to some key machine learning concepts as part of a course o
 | 1a | `lectures/1_a_locating_with_gradients.py` | Location by physics: forward model, misfit, autodiff, gradient descent | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/1_a_locating_with_gradients.py) |
 | 1b | `lectures/1_b_learning_the_inverse_map.py` | A network learns picks to location from simulated events | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/1_b_learning_the_inverse_map.py) |
 | 1c | `lectures/1_c_learning_a_posterior.py` | From a point to a distribution: mixture density networks | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/1_c_learning_a_posterior.py) |
+| 2a | `lectures/2_a_filters_on_waveforms.py` | Filters on real waveforms: sliding templates, many channels, pooling, a small CNN | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/2_a_filters_on_waveforms.py) |
 
 > [!NOTE]
 > The slides rely heavily on interactive figures and playgrounds, and most of that
@@ -45,7 +46,7 @@ Every notebook also declares its own dependencies (PEP 723), so you can run a si
 uvx marimo edit --sandbox lectures/1_a_locating_with_gradients.py
 ```
 
-(needs uv >= 0.7.21). Parts 1a to 1c install `ml_seis` from GitHub in this mode, so it
+(needs uv >= 0.7.21). Parts 1a to 1c and 2a install `ml_seis` from GitHub in this mode, so it
 needs a network connection. With a clone and `uv sync`, the `uv run marimo edit`
 commands above work offline and use your local copy of `src/ml_seis`.
 
@@ -61,12 +62,14 @@ layouts as the editable source, and `make layouts` re-embeds them. The slide
 styling (`lecture_slides.css`, `slides_head.html` in `lectures/`) is read from
 disk next to the notebook and therefore applies to local slides only.
 
-For the three notebooks linked above, the repository also contains marimo session
+For the Part 1 notebooks linked above, the repository also contains marimo session
 snapshots. They give molab its ready-made preview outputs instead of making a reader
 wait for every cell to run. After changing a published notebook or a helper it uses,
 run `make snapshots`: it embeds layouts first, rebuilds those previews, and records
 the exact input hash. `make hooks` installs pre-commit checks that reject stale
-previews or layouts.
+previews or layouts. Part 2a has no snapshot: it plots real records that are
+downloaded when you press the button (Llaima data, see References), so on
+molab it starts empty and downloads them into a cache folder.
 
 ```bash
 # Lecturing: read-only slides, code hidden (add --include-code to show it)
@@ -115,10 +118,15 @@ data/       downloaded and generated data (not in git)
 - Käufl, P., Valentine, A. P., O'Toole, T. B., and Trampert, J. (2014). A framework for fast probabilistic centroid-moment-tensor determination: inversion of regional static displacement measurements. *Geophysical Journal International*, 196(3), 1676–1693. doi:10.1093/gji/ggt473
 - Zhao, X., and Curtis, A. (2024). Variational prior replacement in Bayesian inference and inversion. *Geophysical Journal International*, 239(2), 1236–1256. doi:10.1093/gji/ggae334 (combining a trained density with new information)
 
+**Filters and convolutional networks** (Part 2a)
+
+- LeCun, Y., Bottou, L., Bengio, Y., and Haffner, P. (1998). Gradient-based learning applied to document recognition. *Proceedings of the IEEE*, 86(11), 2278–2324. doi:10.1109/5.726791
+
 **Software and data**
 
 - Paszke, A., et al. (2019). PyTorch: an imperative style, high-performance deep learning library. *NeurIPS 32*. arXiv:1912.01703
 - Sethian, J. A. (1996). A fast marching level set method for monotonically advancing fronts. *PNAS*, 93(4), 1591–1595. doi:10.1073/pnas.93.4.1591 (travel times in the heterogeneous model, via [scikit-fmm](https://github.com/scikit-fmm/scikit-fmm))
+- Canario et al. (2020). Llaima volcano seismic event dataset (station LAV, four analyst classes). Mendeley Data, doi:10.17632/dv8nwdd36k.1 (CC BY-NC 3.0; used in Part 2a, downloaded at run time and never redistributed here)
 - [marimo](https://marimo.io) notebooks and [anywidget](https://anywidget.dev) widgets.
 - U.S. Geological Survey, ANSS Comprehensive Earthquake Catalog (ComCat), 2019 Ridgecrest sequence, used for the `ridgecrest` prior: <https://earthquake.usgs.gov/fdsnws/event/1/>
 

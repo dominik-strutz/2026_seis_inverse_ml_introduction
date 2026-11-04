@@ -129,7 +129,7 @@ function uiField(lab, control) {
 
 // Fixed logical stage of width W, scaled to the cell width. Returns the stage
 // (lay the figure out in it in logical px) and onScale(cb) for canvases.
-function makeStage(el, W) {
+function makeStage(el, W, maxScale = 1.35) {
   const outer = elt("div");
   outer.style.cssText = "width:100%;overflow:hidden;position:relative;";
   const stage = elt("div", "mls");
@@ -142,7 +142,7 @@ function makeStage(el, W) {
   const listeners = [];
   const fit = () => {
     const avail = outer.clientWidth || W;
-    const nk = Math.min(Math.max(avail / W, 0.4), 1.35);
+    const nk = Math.min(Math.max(avail / W, 0.4), maxScale);
     stage.style.transform = `scale(${nk})`;
     stage.style.marginLeft = `${Math.max((avail - W * nk) / 2, 0)}px`;
     outer.style.height = `${stage.offsetHeight * nk}px`;
@@ -160,7 +160,9 @@ function stageCanvas(st, W, H) {
   canvas.style.cssText = `width:${W}px;display:block;touch-action:none;`;
   const ctx = canvas.getContext("2d");
   const resize = () => {
-    const r = (window.devicePixelRatio || 1) * Math.max(st.scale(), 1);
+    // at least 2 device px per logical px: the stage is CSS-scaled (and a slide deck
+    // scales it again), and drawing at the final size would blur the text
+    const r = Math.min(Math.max((window.devicePixelRatio || 1) * st.scale() * 2, 2), 4);
     canvas.style.height = `${H}px`;
     canvas.width = Math.round(W * r); canvas.height = Math.round(H * r);
     ctx.setTransform(r, 0, 0, r, 0, 0);

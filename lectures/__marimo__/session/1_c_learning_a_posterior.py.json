@@ -129,7 +129,7 @@
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='width:74%;margin:0 auto'><marimo-ui-element object-id='RGSE-0' random-id='9de1ec69-1f90-627d-46d2-2116ce0c9f7f'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;1a8a154d6eec48d8bed764cbf49cbade&quot;}' data-label='null' data-model-id='&quot;1a8a154d6eec48d8bed764cbf49cbade&quot;'></marimo-anywidget></marimo-ui-element></div>"
+            "text/html": "<div style='width:74%;margin:0 auto'><marimo-ui-element object-id='RGSE-0' random-id='e82f5b87-768f-3606-2f4c-87307e28d6fb'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;1c379b459edb4bfda720770d110a7061&quot;}' data-label='null' data-model-id='&quot;1c379b459edb4bfda720770d110a7061&quot;'></marimo-anywidget></marimo-ui-element></div>"
           }
         }
       ],
@@ -155,7 +155,7 @@
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='width:74%;margin:0 auto'><marimo-ui-element object-id='emfo-0' random-id='a05eca9c-3ef1-c27b-c238-5501b435163d'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;c982115fa65c4101b9b20e547296c95f&quot;}' data-label='null' data-model-id='&quot;c982115fa65c4101b9b20e547296c95f&quot;'></marimo-anywidget></marimo-ui-element></div>"
+            "text/html": "<div style='width:74%;margin:0 auto'><marimo-ui-element object-id='emfo-0' random-id='50b77594-dae8-e783-3d5e-a3a331f0539f'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;1c73433770aa4b4f997ac2d69d68712e&quot;}' data-label='null' data-model-id='&quot;1c73433770aa4b4f997ac2d69d68712e&quot;'></marimo-anywidget></marimo-ui-element></div>"
           }
         }
       ],
@@ -181,7 +181,7 @@
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='width:74%;margin:0 auto'><marimo-ui-element object-id='nWHF-0' random-id='5fcb89fd-1fb9-2dc3-2a13-04d212b08675'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;771b711026434b7396f3c75282a8c040&quot;}' data-label='null' data-model-id='&quot;771b711026434b7396f3c75282a8c040&quot;'></marimo-anywidget></marimo-ui-element></div>"
+            "text/html": "<div style='width:74%;margin:0 auto'><marimo-ui-element object-id='nWHF-0' random-id='e61e2837-9399-3336-3301-01a533b0cf7d'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;29747ad25bcc4409bc92e7d25b1bd175&quot;}' data-label='null' data-model-id='&quot;29747ad25bcc4409bc92e7d25b1bd175&quot;'></marimo-anywidget></marimo-ui-element></div>"
           }
         }
       ],
@@ -207,7 +207,7 @@
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='width:74%;margin:0 auto'><marimo-ui-element object-id='ZHCJ-0' random-id='8b7f20e9-77a7-805a-effe-bc3adf5ee772'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;f1307b5d1564457e884df51419791c7c&quot;}' data-label='null' data-model-id='&quot;f1307b5d1564457e884df51419791c7c&quot;'></marimo-anywidget></marimo-ui-element></div>"
+            "text/html": "<div style='width:74%;margin:0 auto'><marimo-ui-element object-id='ZHCJ-0' random-id='4381a510-295f-05c9-c49f-6fe7d9977413'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;09c23ba9b80c461a9ba5ca4fd66b6356&quot;}' data-label='null' data-model-id='&quot;09c23ba9b80c461a9ba5ca4fd66b6356&quot;'></marimo-anywidget></marimo-ui-element></div>"
           }
         }
       ],
@@ -311,7 +311,7 @@
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='Pvdt-0' random-id='a749615e-b537-03ad-06bd-5c881acfd554'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;2e0126a95eca40a7b97220985aee9cf2&quot;}' data-label='null' data-model-id='&quot;2e0126a95eca40a7b97220985aee9cf2&quot;'></marimo-anywidget></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"three-things-to-look-for\">Three things to look for</h3>\n<ul>\n<li><strong>One against several.</strong> What does a single component do to a curved band\n  with several clusters?</li>\n<li><strong>Fitted against held out.</strong> How do the NLL of the fitted and of the held-out\n  samples change as <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> grows, and where do they part?</li>\n<li><strong>Few against many.</strong> What do few fitted samples do that many do not?</li>\n</ul></span></div>"
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='Pvdt-0' random-id='47d0b8e1-42cb-f5ca-b157-003e269522c3'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;dfe2765cacd1412d8edbb483bda9acd8&quot;}' data-label='null' data-model-id='&quot;dfe2765cacd1412d8edbb483bda9acd8&quot;'></marimo-anywidget></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"three-things-to-look-for\">Three things to look for</h3>\n<ul>\n<li><strong>One against several.</strong> What does a single component do to a curved band\n  with several clusters?</li>\n<li><strong>Fitted against held out.</strong> How do the NLL of the fitted and of the held-out\n  samples change as <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex> grows, and where do they part?</li>\n<li><strong>Few against many.</strong> What do few fitted samples do that many do not?</li>\n</ul></span></div>"
           }
         }
       ],
@@ -402,7 +402,7 @@
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='xXTn-0' random-id='31938d72-642d-0385-f2fc-fd4e595a01ca'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;ca1f71759543478f93bc226424e30f93&quot;}' data-label='null' data-model-id='&quot;ca1f71759543478f93bc226424e30f93&quot;'></marimo-anywidget></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"four-things-to-look-for\">Four things to look for</h3>\n<span class=\"paragraph\">Change one thing at a time and watch the maps, the curves and the errors.</span>\n<ul>\n<li><strong>Output.</strong> What does the network return when the data allow two answers?</li>\n<li><strong>Components.</strong> How many bumps does the answer need?</li>\n<li><strong>Ambiguity.</strong> What happens to the answer as the event moves towards the line of\n  stations, and away from it?</li>\n<li><strong>Shift.</strong> Does the spread of the mixture tell you when the network is out of its\n  depth?</li>\n</ul></span></div>"
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='xXTn-0' random-id='f8f44785-31d0-cbd9-e6ed-d203b4839ccc'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;6a3735d770a640529eefe7931ba0c73c&quot;}' data-label='null' data-model-id='&quot;6a3735d770a640529eefe7931ba0c73c&quot;'></marimo-anywidget></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"four-things-to-look-for\">Four things to look for</h3>\n<span class=\"paragraph\">Change one thing at a time and watch the maps, the curves and the errors.</span>\n<ul>\n<li><strong>Output.</strong> What does the network return when the data allow two answers?</li>\n<li><strong>Components.</strong> How many bumps does the answer need?</li>\n<li><strong>Ambiguity.</strong> What happens to the answer as the event moves towards the line of\n  stations, and away from it?</li>\n<li><strong>Shift.</strong> Does the spread of the mixture tell you when the network is out of its\n  depth?</li>\n</ul></span></div>"
           }
         }
       ],
@@ -480,7 +480,7 @@
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='height:80vh'><div style='display: flex;flex: 1;flex-direction: column;justify-content: center;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='wlCL-0' random-id='9108b197-a3c3-095a-1e84-7c813adf1a90'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;0025c615341848738e8f745da5882ac1&quot;}' data-label='null' data-model-id='&quot;0025c615341848738e8f745da5882ac1&quot;'></marimo-anywidget></marimo-ui-element></div></div>"
+            "text/html": "<div style='height:80vh'><div style='display: flex;flex: 1;flex-direction: column;justify-content: center;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='wlCL-0' random-id='3aad5665-369c-b6d2-89e4-8cfe3ddecee0'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;4fcc380cd36f4a6a847a5c92abeb1302&quot;}' data-label='null' data-model-id='&quot;4fcc380cd36f4a6a847a5c92abeb1302&quot;'></marimo-anywidget></marimo-ui-element></div></div>"
           }
         }
       ],
