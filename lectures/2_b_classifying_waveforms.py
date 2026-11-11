@@ -128,7 +128,9 @@ def _(mo):
 
     The network of 2a: blocks of filters, batch normalisation and ReLU with max-pooling
     in between, an average over time and a linear layer. It returns one number per
-    class. The training loop of Part 1b comes below, written for batches of records.
+    class. Here it is narrower, 8 filters in every block and no dropout, so that we
+    can look at everything it learned afterwards. The training loop of Part 1b comes
+    below, written for batches of records.
     """)
     return
 
@@ -145,20 +147,20 @@ def _(nn):
     class WaveformCNN(nn.Module):
         """Waveform (batch, 1, samples) -> n_out numbers per record."""
 
-        def __init__(self, n_out, base=16, kernel=9, dropout=0.3):
+        def __init__(self, n_out, width=8, kernel=9):
             super().__init__()
             self.features = nn.Sequential(
-                conv_block(1, base, kernel),
+                conv_block(1, width, kernel),
                 nn.MaxPool1d(4),
-                conv_block(base, 2 * base, kernel),
+                conv_block(width, width, kernel),
                 nn.MaxPool1d(4),
-                conv_block(2 * base, 4 * base, kernel),
+                conv_block(width, width, kernel),
                 nn.MaxPool1d(4),
-                conv_block(4 * base, 4 * base, kernel),
+                conv_block(width, width, kernel),
                 nn.AdaptiveAvgPool1d(1),
                 nn.Flatten(),
             )
-            self.head = nn.Sequential(nn.Dropout(dropout), nn.Linear(4 * base, n_out))
+            self.head = nn.Linear(width, n_out)
 
         def forward(self, u):
             return self.head(self.features(u))
@@ -467,21 +469,26 @@ def _(cm_good, llaima, metrics, mo):
     mo.md(f"""
     ## Accuracy, recall and precision
 
-    **Accuracy**: the share of records that get their label
+    **Confusion matrix**: one row per label, one column per answer of the network;
+      each entry counts the test records with that label that got that answer, and
+      the right answers sit on the diagonal
 
-    **Recall** of a class: of the records with that label, how many did we find?
+    **Accuracy**: of all test records, the share the network answers correctly
+      (the diagonal over everything)
 
-    **Precision** of a class: of the records we called that class, how many are
-      right?
+    **Recall** of a class: of all records that truly have this label, the share the
+      network finds (the diagonal entry over its row). It asks: when this event
+      happens, do we catch it?
 
-    **Confusion matrix**: counts, for every label (row), what the network said
-      (column)
+    **Precision** of a class: of all records the network calls this class, the share
+      that truly have this label (the diagonal entry over its column). It asks: when
+      the network raises this alarm, can we trust it?
 
     An example with made-up numbers for {int(cm_good.sum())} test records: `VT` has
     **recall {100 * _report["recall"][_vt]:.0f}%** (the row: {cm_good[_vt, _vt]} of
     {cm_good[_vt].sum()} found) and **precision {100 * _report["precision"][_vt]:.0f}%**
     (the column: {cm_good[_vt, _vt]} of {cm_good[:, _vt].sum()} called `VT` are
-    right).
+    right)
     """)
     return
 
@@ -562,11 +569,8 @@ def _(LLAIMA_WINDOW, llaima, mo):
       epochs, so the last steps are small and the final network does not depend on
       the last mini-batches
 
-    Two layers help a convolutional network train:
-
-    - **Batch normalisation** rescales the output of each filter
-    - **Dropout** switches off a random share of the 64 features while training, so
-      the network cannot rely on a single one
+    **Batch normalisation** rescales the output of each filter and helps a
+    convolutional network train
 
     The test records stay untouched until the network is trained.
     """)
@@ -621,8 +625,7 @@ def _(mo):
     mo.md(r"""
     ## Augmentation
 
-    A network with this many weights can fit the training records better than new
-      ones
+    A network always fits the training records a little better than new ones
 
     Augmentation works against that: every epoch the training windows are altered a
       little, and **the class does not change**
@@ -812,19 +815,21 @@ def _(llaima, model, plots):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## Where the first blocks react
+    ## Where the blocks react
 
     A feature map says where in the record a filter's pattern is present
 
-    Each row is one filter of the first two blocks; the second block sees longer
-    structures, at a quarter of the time resolution
+    Each row is one filter, block by block; deeper blocks see longer structures, at
+      a coarser time resolution
+
+    The last block is averaged over time into the features
     """)
     return
 
 
 @app.cell(hide_code=True)
 def _(artifact, classify, llaima, metrics, model, showcase, window):
-    # the 40 test records of the sliders above, with the maps of the first two blocks
+    # the 40 test records of the sliders above, with the maps of all four blocks
     artifact(
         "cnn_activations",
         **metrics.activation_records(
@@ -833,6 +838,7 @@ def _(artifact, classify, llaima, metrics, model, showcase, window):
             llaima.label[showcase],
             classify(model, window[showcase]),
             llaima.classes,
+            n_blocks=4,
         ),
     )
     return
@@ -843,10 +849,10 @@ def _(mo):
     mo.md(r"""
     ## Internal Features
 
-    The last block ends in 64 numbers per record, the **features**: the average over
-      time of its 64 feature maps
+    The last block ends in 8 numbers per record, the **features**: the average over
+      time of its 8 feature maps
 
-    The linear layer sees only these 64 numbers, so they are the network's
+    The linear layer sees only these 8 numbers, so they are the network's
       description of the record
 
     We extract them and leave out the linear layer
@@ -870,7 +876,7 @@ def _(mo):
     mo.md(r"""
     ## Internal Features
 
-    Project the 64 numbers onto their two strongest directions of variation
+    Project the 8 numbers onto their two strongest directions of variation
 
     Each test record is coloured by its label
 

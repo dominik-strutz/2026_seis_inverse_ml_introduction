@@ -19,7 +19,7 @@ A short introduction to some key machine learning concepts as part of a course o
 > I tested the outputs extensively, and wherever possible the underlying logic
 > relies on transparent and concise PyTorch code. The large amount of HTML,
 >  CSS and JavaScrip for interactive layers themselfs has not been reviewed 
-> by me, I am neither qualified to review it, and it would take a lot of time.
+> by me, I am not qualified to review it and it would take a lot of time
 >
 > If anything seems off, please get in touch or
 > [open an issue](https://github.com/dominik-strutz/2026_seis_inverse_ml_introduction/issues).

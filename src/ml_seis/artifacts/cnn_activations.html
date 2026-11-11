@@ -1,10 +1,10 @@
 <!doctype html>
-<!-- Artifact: where the first two convolution blocks of the 2b network react. One test
-     record on top, then every filter of block 1 (16) and block 2 (32) as its own row of
-     a colour map over time (viridis, one colour scale per block). Two buttons step
+<!-- Artifact: where the convolution blocks of the 2b network react. One test
+     record on top, then every filter of every block (four blocks of 8) as its own row
+     of a colour map over time (viridis, one colour scale per block). Two buttons step
      through the records; the title line gives the label and the network's answer.
      Hovering a row outlines it and draws that filter's weights on the left (block 1: a 9-weight
-     waveform; block 2: 16 input channels x 9 weights, blue positive, vermillion
+     waveform; later blocks: input channels x 9 weights, blue positive, vermillion
      negative).
      window.ARTIFACT {records, rows, cols, samples} comes from the notebook:
      ml_seis.waveform_metrics.activation_records (base64 bytes: record as int8, maps as
@@ -15,7 +15,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="artifact-size" content="1100x560">
-<title>Where the first blocks react</title>
+<title>Where the blocks react</title>
 <style>
   :root {
     --bg: #ffffff; --ink: #111111; --ink2: #5c6370; --grid: #d9dde4;
@@ -53,7 +53,7 @@
 <div id="stage">
   <canvas id="heat" width="2200" height="1120"></canvas>
   <svg id="fig" width="1100" height="560" viewBox="0 0 1100 560" role="img"
-       aria-label="Feature maps of the first two blocks, one row per filter"></svg>
+       aria-label="Feature maps of every block, one row per filter"></svg>
   <div id="bar">
     <button id="prev">▲ previous record</button>
     <button id="next">▼ next record</button>
@@ -63,15 +63,14 @@
 
 <script>
   const ns = "http://www.w3.org/2000/svg";
-  const A = window.ARTIFACT || { records: [], rows: [16, 32], cols: [750, 187], samples: 750 };
+  const A = window.ARTIFACT || { records: [], rows: [8, 8, 8, 8], cols: [750, 187, 46, 11], samples: 750 };
   const RATE = 50, T = A.samples, SEC = T / RATE;
   const X0 = 150, W = 920;                 // plot area: left edge, width
-  const INPUT = { y: 52, h: 60 };
-  const ROW = 8;                           // logical px per filter
+  const INPUT = { y: 48, h: 52 };
+  const ROW = 11;                          // logical px per filter
   const blocks = A.rows.map((n, b) => ({ n, len: A.cols[b], h: n * ROW }));
-  blocks[0].y = 126;
-  blocks[1].y = blocks[0].y + blocks[0].h + 14;
-  const BOTTOM = blocks[1].y + blocks[1].h;
+  blocks.forEach((b, k) => { b.y = k ? blocks[k - 1].y + blocks[k - 1].h + 14 : 112; });
+  const BOTTOM = blocks[blocks.length - 1].y + blocks[blocks.length - 1].h;
 
   // viridis from a few anchors
   const ANCH = [[0, 68, 1, 84], [.125, 72, 40, 120], [.25, 62, 74, 137], [.375, 49, 104, 142],
@@ -114,8 +113,7 @@
   blocks.forEach((b, k) => {
     frame(b.y, b.h);
     txt(12, b.y + 14, `BLOCK ${k + 1}`, "cap");
-    txt(12, b.y + 30, `${b.n} filters, one per row`, "dim");
-    if (k === 1) txt(12, b.y + 46, "¼ of the time samples", "dim");
+    txt(12, b.y + 28, `${b.n} filters, ${b.len} steps`, "dim");
     for (const i of [0, b.n - 1]) {
       const y = b.y + (i + 0.5) * ROW;
       el("line", { x1: X0, x2: X0 + 4, y1: y, y2: y, class: "ax" });
@@ -177,38 +175,35 @@
   const put = (x, y, s, cls, anchor) => hov.appendChild(txt(x, y, s, cls, anchor));
   function hover(k, i) {
     hov.replaceChildren();
-    blocks.forEach((b, kk) => {
-      const top = b.y + (kk === 0 ? 58 : 80);
-      if (kk !== k || i === null || !F[kk]) {
-        put(12, b.y + (kk === 0 ? 70 : 84), "hover a row to see", "dim");
-        put(12, b.y + (kk === 0 ? 84 : 98), "the weights of its filter", "dim");
-        return;
+    if (k < 0 || i === null || !F[k]) {
+      put(12, blocks[0].y + 50, "hover a row to see", "dim");
+      put(12, blocks[0].y + 64, "the weights of its filter", "dim");
+      return;
+    }
+    const b = blocks[k], top = b.y + 38;
+    const [, nin, K] = F[k].shape, w = F[k].w;
+    el("rect", { x: X0, y: b.y + i * ROW, width: W, height: ROW, fill: "none",
+      stroke: "var(--c2)", "stroke-width": 1.4 }, hov);
+    if (k === 0) {                                      // 1 input channel: a short waveform
+      const mid = top + 17, x0 = 16, x1 = 126;
+      el("line", { x1: x0, x2: x1, y1: mid, y2: mid, class: "gr" }, hov);
+      el("line", { x1: x0, x2: x0, y1: top, y2: top + 34, class: "ax" }, hov);
+      const pts = Array.from({ length: K }, (_, j) =>
+        [x0 + 6 + ((x1 - x0 - 12) * j) / (K - 1), mid - (w[i * K + j] / 127) * 15]);
+      el("polyline", { points: pts.map(q => q.join(",")).join(" "), fill: "none",
+        style: "stroke:var(--c2);stroke-width:1.4" }, hov);
+      pts.forEach(q => el("circle", { cx: q[0], cy: q[1], r: 2.2, style: "fill:var(--c2)" }, hov));
+      put(16, top + 48, `filter ${i + 1}: ${K} weights`, "dim");
+    } else {                                            // input channels x weights, as a map
+      const cw = 11, ch = 4, x0 = 16;
+      for (let c = 0; c < nin; c++) for (let j = 0; j < K; j++) {
+        const v = w[(i * nin + c) * K + j] / 127;
+        el("rect", { x: x0 + j * cw, y: top + c * ch, width: cw, height: ch,
+          style: `fill:var(${v >= 0 ? "--c1" : "--c2"});opacity:${Math.abs(v).toFixed(2)}` }, hov);
       }
-      const [, nin, K] = F[kk].shape, w = F[kk].w;
-      el("rect", { x: X0, y: b.y + i * ROW, width: W, height: ROW, fill: "none",
-        stroke: "var(--c2)", "stroke-width": 1.4 }, hov);
-      put(12, top - 6, `filter ${i + 1} of ${b.n}`, "");
-      if (kk === 0) {                                   // 1 input channel: a short waveform
-        const mid = top + 30, x0 = 16, x1 = 126;
-        el("line", { x1: x0, x2: x1, y1: mid, y2: mid, class: "gr" }, hov);
-        el("line", { x1: x0, x2: x0, y1: top, y2: top + 60, class: "ax" }, hov);
-        const pts = Array.from({ length: K }, (_, j) =>
-          [x0 + 6 + ((x1 - x0 - 12) * j) / (K - 1), mid - (w[i * K + j] / 127) * 27]);
-        el("polyline", { points: pts.map(q => q.join(",")).join(" "), fill: "none",
-          style: "stroke:var(--c2);stroke-width:1.4" }, hov);
-        pts.forEach(q => el("circle", { cx: q[0], cy: q[1], r: 2.2, style: "fill:var(--c2)" }, hov));
-        put(16, top + 76, `${K} weights`, "dim");
-      } else {                                          // input channels x weights, as a map
-        const cw = 11, ch = 4, x0 = 16;
-        for (let c = 0; c < nin; c++) for (let j = 0; j < K; j++) {
-          const v = w[(i * nin + c) * K + j] / 127;
-          el("rect", { x: x0 + j * cw, y: top + c * ch, width: cw, height: ch,
-            style: `fill:var(${v >= 0 ? "--c1" : "--c2"});opacity:${Math.abs(v).toFixed(2)}` }, hov);
-        }
-        el("line", { x1: x0, x2: x0, y1: top, y2: top + nin * ch, class: "ax" }, hov);
-        put(x0, top + nin * ch + 14, `${nin} channels x ${K} weights`, "dim");
-      }
-    });
+      el("line", { x1: x0, x2: x0, y1: top, y2: top + nin * ch, class: "ax" }, hov);
+      put(x0, top + nin * ch + 14, `filter ${i + 1}: ${nin} x ${K} weights`, "dim");
+    }
   }
   hover(-1, null);
   const stageEl = document.getElementById("stage");
