@@ -100,14 +100,20 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # Part 2a: filters on waveforms
+def _(artifact, mo):
+    mo.vstack(
+        [
+            mo.md(r"""
+            # Part 2a: filters on waveforms
 
-    ### Machine learning and inversion for seismologists
+            ### Machine learning and inversion for seismologists
 
-    https://github.com/dominik-strutz/2026_seis_inverse_ml_introduction
-    """)
+            https://github.com/dominik-strutz/2026_seis_inverse_ml_introduction
+            """),
+            artifact("title_figure_waveforms", width="65%"),
+        ],
+        gap=0,
+    )
     return
 
 
@@ -175,7 +181,7 @@ def _(LLAIMA_NAMES, llaima, llaima_cache, llaima_card, mo):
 @app.cell(hide_code=True)
 def _(llaima, mo):
     mo.md(f"""
-    ## Volcano records with analyst labels
+    ## Volcano records with labels
 
     * {len(llaima.label):,} records from one station on **Llaima volcano,
     Chile**.
@@ -184,7 +190,7 @@ def _(llaima, mo):
     {llaima.sampling_rate:.0f} Hz => $T$ = {llaima.u.shape[-1]} samples.
 
 
-    An analyst at the observatory gave each record one of four labels:
+    An expert at the observatory gave each record one of four labels:
 
     - **LP**: long-period events: fluid and gas moving, mostly low frequencies,
     - **TR**: tremor: a long, steady signal,
@@ -297,7 +303,7 @@ def _(llaima, mo):
     mo.md(f"""
     ## Some disclaimers
 
-    - The labels are **one analyst's judgement**, not ground truth, and records may
+    - The labels are **one expert's judgement**, not ground truth, and records may
       overlap.
     - The source gives no event identity or time, so near-duplicate events may sit in
       both training and test data. We cannot rule that out.
@@ -611,7 +617,7 @@ def _(mo):
     ## Which filters?
 
     So far we picked or drew the filters. In Part 2b the gradient of Part 1 chooses
-    them, so that the four scores become the analyst's labels.
+    them, so that the four logits give the labels.
     """)
     return
 

@@ -8,6 +8,7 @@ A short introduction to some key machine learning concepts as part of a course o
 | 1b | `lectures/1_b_learning_the_inverse_map.py` | A network learns picks to location from simulated events | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/1_b_learning_the_inverse_map.py) |
 | 1c | `lectures/1_c_learning_a_posterior.py` | From a point to a distribution: mixture density networks | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/1_c_learning_a_posterior.py) |
 | 2a | `lectures/2_a_filters_on_waveforms.py` | Filters on real waveforms: sliding templates, many channels, pooling, a small CNN | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/2_a_filters_on_waveforms.py) |
+| 2b | `lectures/2_b_classifying_waveforms.py` | Training a waveform classifier: logits, softmax, cross-entropy, a CNN on Llaima records | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/dominik-strutz/2026_seis_inverse_ml_introduction/blob/main/lectures/2_b_classifying_waveforms.py) |
 
 > [!NOTE]
 > The slides rely heavily on interactive figures and playgrounds, and most of that
@@ -46,7 +47,7 @@ Every notebook also declares its own dependencies (PEP 723), so you can run a si
 uvx marimo edit --sandbox lectures/1_a_locating_with_gradients.py
 ```
 
-(needs uv >= 0.7.21). Parts 1a to 1c and 2a install `ml_seis` from GitHub in this mode, so it
+(needs uv >= 0.7.21). Parts 1a to 1c, 2a and 2b install `ml_seis` from GitHub in this mode, so it
 needs a network connection. With a clone and `uv sync`, the `uv run marimo edit`
 commands above work offline and use your local copy of `src/ml_seis`.
 
@@ -67,7 +68,7 @@ snapshots. They give molab its ready-made preview outputs instead of making a re
 wait for every cell to run. After changing a published notebook or a helper it uses,
 run `make snapshots`: it embeds layouts first, rebuilds those previews, and records
 the exact input hash. `make hooks` installs pre-commit checks that reject stale
-previews or layouts. Part 2a has no snapshot: it plots real records that are
+previews or layouts. Parts 2a and 2b have no snapshot: they plot real records that are
 downloaded when you press the button (Llaima data, see References), so on
 molab it starts empty and downloads them into a cache folder.
 
@@ -126,7 +127,7 @@ data/       downloaded and generated data (not in git)
 
 - Paszke, A., et al. (2019). PyTorch: an imperative style, high-performance deep learning library. *NeurIPS 32*. arXiv:1912.01703
 - Sethian, J. A. (1996). A fast marching level set method for monotonically advancing fronts. *PNAS*, 93(4), 1591–1595. doi:10.1073/pnas.93.4.1591 (travel times in the heterogeneous model, via [scikit-fmm](https://github.com/scikit-fmm/scikit-fmm))
-- Canario et al. (2020). Llaima volcano seismic event dataset (station LAV, four analyst classes). Mendeley Data, doi:10.17632/dv8nwdd36k.1 (CC BY-NC 3.0; used in Part 2a, downloaded at run time and never redistributed here)
+- Canario et al. (2020). Llaima volcano seismic event dataset (station LAV, four labelled classes). Mendeley Data, doi:10.17632/dv8nwdd36k.1 (CC BY-NC 3.0; used in Parts 2a and 2b, downloaded at run time and never redistributed here)
 - [marimo](https://marimo.io) notebooks and [anywidget](https://anywidget.dev) widgets.
 - U.S. Geological Survey, ANSS Comprehensive Earthquake Catalog (ComCat), 2019 Ridgecrest sequence, used for the `ridgecrest` prior: <https://earthquake.usgs.gov/fdsnws/event/1/>
 

@@ -3,7 +3,7 @@
 Two datasets, both fetched at run time into ``data/waveforms`` (git-ignored):
 
 * **Llaima** volcano-seismic classification set (Canario et al., 2020, CC BY-NC 3.0),
-  3,592 vertical-component records of station LAV, four analyst classes.
+  3,592 vertical-component records of station LAV, four labelled classes.
 * **CEED / Southern California** phase-picking subset: three-component records with
   analyst P and S picks (Zhu et al., 2025; original data SCSN/SCEDC).
 
@@ -36,6 +36,7 @@ LLAIMA_ZIP_URL = "https://data.mendeley.com/public-api/zip/dv8nwdd36k/download/1
 LLAIMA_DOI = "10.17632/dv8nwdd36k.1"
 LLAIMA_LENGTH = 3008  # 60 s at 50 Hz after decimation by 2, padded to 16 x 188
 LLAIMA_RATE = 50.0
+LLAIMA_WINDOW = 750  # 15 s from the start of a record: the onset, and no padding
 
 # The old HDF5-era release keeps one file per year; 2007 is the largest one that is
 # still a single laptop-sized download (361 MB, 2,416 three-component traces).
@@ -123,9 +124,23 @@ class LlaimaData:
     classes: tuple
     sampling_rate: float
     provenance: dict
+    n_live: object = None  # samples before the flat padding, (N,)
 
-    def indices(self, split: str):
-        return (self.split == SPLITS.index(split)).nonzero().squeeze(1)
+    def indices(self, split: str, min_live: int = 0):
+        """Records of ``split``; with ``min_live`` only those whose signal lasts at
+        least that many samples (so a window of that length holds no padding)."""
+        keep = self.split == SPLITS.index(split)
+        if min_live:
+            keep = keep & (self.n_live >= min_live)
+        return keep.nonzero().squeeze(1)
+
+    def window(self, length: int = LLAIMA_WINDOW):
+        """The first ``length`` samples of every record, ``(N, 1, length)``.
+
+        The records start at the onset (median 2 to 5 s in), so the window holds the
+        arrival. Records with ``n_live < length`` would contain padding; select the
+        others with ``indices(split, min_live=length)``."""
+        return self.u[..., :length]
 
     def pick(self, split: str, class_name: str, k: int = 0) -> int:
         """Global index of the ``k``-th record of ``class_name`` in ``split``."""
@@ -190,6 +205,19 @@ def prepare_llaima(cache_dir, progress=None) -> Path:
     return cache
 
 
+def live_length(u):
+    """Samples of each record in ``u`` (N, 1, T) before the flat padding at its end.
+
+    The padding repeats the last sample, so the signal ends one sample after the last
+    change between neighbours."""
+    import torch
+
+    changed = (u[:, 0, 1:] - u[:, 0, :-1]).abs() >= 1e-6
+    position = torch.arange(changed.shape[1])
+    last = torch.where(changed, position, torch.full_like(position, -1)).max(dim=1)
+    return (last.values + 2).clamp(max=u.shape[-1])
+
+
 def load_llaima(cache_dir) -> LlaimaData:
     import torch
 
@@ -198,7 +226,9 @@ def load_llaima(cache_dir) -> LlaimaData:
         label = torch.from_numpy(file["label"])
         split = torch.from_numpy(file["split"])
         provenance = json.loads(str(file["provenance"]))
-    return LlaimaData(u, label, split, LLAIMA_CLASSES, LLAIMA_RATE, provenance)
+    return LlaimaData(
+        u, label, split, LLAIMA_CLASSES, LLAIMA_RATE, provenance, live_length(u)
+    )
 
 
 # ---------------------------------------------------------------------------- CEED

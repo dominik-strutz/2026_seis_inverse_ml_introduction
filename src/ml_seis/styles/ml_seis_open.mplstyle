@@ -1,5 +1,6 @@
 # ml_seis axes look "open": left and bottom spines with inward ticks, no top or right
-# spine, no grid. Never spineless: every plot keeps at least a y and an x axis.
+# spine, no grid by default (switch on a faint one per axes when it helps). Normally
+# every plot keeps at least a y and an x axis.
 # Default for slides. Load after ml_seis.mplstyle (and ml_seis_dark.mplstyle).
 
 axes.spines.left    : True

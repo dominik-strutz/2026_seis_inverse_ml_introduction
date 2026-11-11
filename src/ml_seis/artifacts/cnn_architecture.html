@@ -192,7 +192,7 @@
     });
     const ch = list[list.length - 1].ch;
     list.push({ name: "features", ch, L: 1, kind: "dense", l2: `${ch} values`, l3: "" });
-    list.push({ name: "logits", ch: n, L: 1, kind: "out", l2: n === 1 ? "1 score" : `${n} scores`, l3: "" });
+    list.push({ name: "logits", ch: n, L: 1, kind: "out", l2: n === 1 ? "1 logit" : `${n} logits`, l3: "" });
     list.push({ name: n === 1 ? "probability" : "probabilities", ch: n, L: 1, kind: "out",
       l2: n === 1 ? "volcano-related" : "sum to 1", l3: "" });
     ops.push(["mean"], ["linear"], [n === 1 ? "sigmoid" : "softmax"]);
@@ -259,14 +259,14 @@
     });
     // one arrow per step, the operations above it
     ops.forEach((op, i) => {
-      if (op[0] === "linear") {                       // every feature to every score: one line per weight
+      if (op[0] === "linear") {                       // every feature to every logit: one line per weight
         const xa = cx(i) + 8, xb = cx(i + 1) - 8, col = i + 1 === state.sel ? "var(--c2)" : "var(--ink2)";
         neurons(cx(i), list[i].ch).filter(q => !q.dots).forEach(a =>
           neurons(cx(i + 1), list[i + 1].ch).forEach(b => el(g, "line", { x1: xa, y1: a.y, x2: xb, y2: b.y,
             stroke: col, "stroke-width": 0.8, opacity: 0.7 })));
         el(g, "text", { class: "mono dim" + (i + 1 === state.sel ? " sel" : ""), x: (xa + xb) / 2, y: CY - 78,
           "text-anchor": "middle" }, "linear");
-        ["every feature feeds", "every score"].forEach((t, j) => el(g, "text", { class: "sub", x: (xa + xb) / 2,
+        ["every feature feeds", "every logit"].forEach((t, j) => el(g, "text", { class: "sub", x: (xa + xb) / 2,
           y: CY + 82 + 14 * j }, t));
         return;
       }

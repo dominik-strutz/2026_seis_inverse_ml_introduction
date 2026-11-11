@@ -41,14 +41,10 @@ solutions/*
 # Personal lecture notes of the maintainer -- local only, not for agents
 notes/
 
-# Parts 2b to 2d (waveforms): local only for now, not published (2a is published,
-# without a molab link: it needs the downloaded Llaima data)
-lectures/2_b_classifying_waveforms.py
+# Parts 2c and 2d (waveforms): local only for now, not published (2a and 2b are
+# published, without a snapshot: they need the downloaded Llaima data)
 lectures/2_c_learning_without_labels.py
 lectures/2_d_picking_phases.py
-lectures/layouts/2_b_classifying_waveforms.slides.json
 lectures/layouts/2_c_learning_without_labels.slides.json
 lectures/layouts/2_d_picking_phases.slides.json
-src/ml_seis/artifacts/picking.html
 src/ml_seis/artifacts/unet_architecture.html
-src/ml_seis/artifacts/softmax_loss.html

@@ -88,6 +88,9 @@ def inputs(part: str) -> list[Path]:
     for extra in ALWAYS:
         path = PKG / extra
         files |= set(path.rglob("*")) if path.is_dir() else {path}
+    files = {
+        p for p in files if p.suffix != ".md"
+    }  # notes about a style change nothing
     return sorted(p for p in files if p.is_file())
 
 

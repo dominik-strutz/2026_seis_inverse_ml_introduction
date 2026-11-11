@@ -141,6 +141,72 @@ def layer_activations(features, x):
     return activations, names
 
 
+def activation_records(features, u, label, probability, classes, n_blocks: int = 2):
+    """The records ``u`` with the maps of the first ``n_blocks`` blocks, for the
+    ``cnn_activations.html`` artefact (``window.ARTIFACT``).
+
+    ``u`` is ``(N, 1, T)``, ``label`` the label index of every record and
+    ``probability`` ``(N, classes)``. Every map is scaled to bytes by the largest value
+    of its block (one colour scale for all filters of a block), the record by its
+    largest absolute value, and written as base64: ``rows`` and ``cols`` give the
+    shape of the maps of each block, ``filters`` the convolution weights of each block
+    (scaled by their largest absolute value) with their shape."""
+    import base64
+
+    import torch
+    from torch import nn
+
+    records, shape = [], []
+    for i in range(len(u)):
+        maps, _ = layer_activations(features, u[i : i + 1])
+        maps = [m.numpy() for m in maps[:n_blocks]]
+        shape = [m.shape for m in maps]
+        x = u[i, 0].numpy()
+        guess = int(torch.as_tensor(probability[i]).argmax())
+        records.append(
+            {
+                "label": classes[int(label[i])],
+                "guess": classes[guess],
+                "p": float(probability[i][guess]),
+                "x": base64.b64encode(
+                    np.round(127 * x / max(np.abs(x).max(), 1e-12))
+                    .astype(np.int8)
+                    .tobytes()
+                ).decode(),
+                "maps": [
+                    base64.b64encode(
+                        np.round(255 * m / max(m.max(), 1e-12))
+                        .astype(np.uint8)
+                        .tobytes()
+                    ).decode()
+                    for m in maps
+                ],
+            }
+        )
+    filters = []
+    for block in [layer for layer in features if isinstance(layer, nn.Sequential)][
+        :n_blocks
+    ]:
+        w = block[0].weight.detach().numpy()  # (filters, input channels, kernel)
+        filters.append(
+            {
+                "shape": [int(n) for n in w.shape],
+                "w": base64.b64encode(
+                    np.round(127 * w / max(np.abs(w).max(), 1e-12))
+                    .astype(np.int8)
+                    .tobytes()
+                ).decode(),
+            }
+        )
+    return {
+        "records": records,
+        "filters": filters,
+        "rows": [int(r) for r, _ in shape],
+        "cols": [int(c) for _, c in shape],
+        "samples": int(u.shape[-1]),
+    }
+
+
 def extract_picks(probability, threshold: float = 0.3):
     """One P and one S pick per trace from the picker's probability curves.
 
@@ -243,21 +309,46 @@ def log_spectrogram(
     return np.maximum(db, -60.0), freq, time
 
 
-def fill_padding(u, scale: float, seed: int = 0):
-    """Replace the flat padding of records ``u`` (N, 1, T) by Gaussian noise.
+def length_baseline(n_live_train, label_train, n_live_test, edges, n_classes: int):
+    """Classify by how long the signal lasts, nothing else.
 
-    A sample is flat when it repeats the previous one. The noise has ``scale`` times
-    the standard deviation of the rest of the record, so ``scale = 0`` keeps a flat
-    line of zeros and ``scale = 1`` makes the padding as loud as the signal."""
+    The commonest training class in each bin of ``edges`` (samples) is the answer for
+    the test records that fall in that bin; an empty bin answers with the commonest
+    class overall. Returns the predicted labels of the test records."""
+    n_live_train, label_train = np.asarray(n_live_train), np.asarray(label_train)
+    train_bin = np.digitize(n_live_train, edges)
+    overall = np.bincount(label_train, minlength=n_classes).argmax()
+    answer = {
+        b: np.bincount(label_train[train_bin == b], minlength=n_classes).argmax()
+        for b in np.unique(train_bin)
+    }
+    return np.array(
+        [answer.get(b, overall) for b in np.digitize(np.asarray(n_live_test), edges)]
+    )
+
+
+def fill_tail(u, n_live, kind: str = "band", sampling_rate: float = 50.0, seed=0):
+    """Replace the flat padding of records ``u`` (N, 1, T) by noise.
+
+    The noise has the standard deviation of the live part of the record. ``kind`` is
+    ``"white"`` (all frequencies) or ``"band"`` (1 to 10 Hz, the band of the Llaima
+    records, so the tail looks like noise recorded by the same station)."""
     import torch
 
     x = u[:, 0]
-    step = (x[:, 1:] - x[:, :-1]).abs() < 1e-6
-    flat = torch.cat([step[:, :1], step], dim=1)
-    live = (~flat).float()
+    tail = torch.arange(x.shape[1])[None, :] >= n_live[:, None]
+    live = (~tail).float()
     count = live.sum(dim=1).clamp(min=1)
     mean = (x * live).sum(dim=1) / count
     spread = (((x - mean[:, None]) ** 2 * live).sum(dim=1) / count).sqrt()
-    torch.manual_seed(seed)
-    noise = torch.randn(x.shape)
-    return torch.where(flat, noise * (scale * spread)[:, None], x)[:, None]
+    generator = torch.Generator().manual_seed(seed)
+    noise = torch.randn(x.shape, generator=generator)
+    if kind == "band":
+        spectrum = torch.fft.rfft(noise, dim=1)
+        freq = torch.fft.rfftfreq(x.shape[1], 1.0 / sampling_rate)
+        spectrum[:, (freq < 1.0) | (freq > 10.0)] = 0
+        noise = torch.fft.irfft(spectrum, n=x.shape[1], dim=1)
+        noise = noise / noise.std(dim=1, keepdim=True)
+    elif kind != "white":
+        raise ValueError(kind)
+    return torch.where(tail, noise * spread[:, None], x)[:, None]

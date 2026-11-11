@@ -66,6 +66,85 @@ def plot_class_balance(data):
     return _done(fig)
 
 
+def plot_sigmoid_softmax():
+    """One logit and the sigmoid next to two logits and the softmax.
+
+    The probability of class 1 depends on the two logits only through ``a_1 - a_2``;
+    the sigmoid is the cut of the softmax along ``a_2 = 0``."""
+    import matplotlib.pyplot as plt
+
+    a = np.linspace(-6, 6, 241)
+    grid = np.linspace(-4, 4, 161)
+    a_1, a_2 = np.meshgrid(grid, grid)
+    p_1 = 1 / (1 + np.exp(a_2 - a_1))
+    with plt.style.context(style("open")):
+        cut = _c("C1")
+        fig, (left, right) = plt.subplots(
+            1, 2, figsize=(7.5, 3.0), gridspec_kw={"width_ratios": [1.2, 1]}
+        )
+        left.plot(a, 1 / (1 + np.exp(-a)), color=cut)
+        left.plot([0], [0.5], "o", color=cut)
+        left.set_yticks([0, 0.5, 1])
+        left.set_xlabel("logit $a$")
+        left.set_ylabel("probability $p$")
+        left.set_title("one logit: sigmoid  $p = 1/(1 + e^{-a})$")
+        shades = right.contourf(
+            a_1, a_2, p_1, levels=np.linspace(0, 1, 11), cmap="Blues"
+        )
+        right.contour(
+            a_1, a_2, p_1, levels=[0.5], colors="k", linewidths=0.8, linestyles="--"
+        )
+        right.axhline(0, color=cut, lw=1.6)
+        right.text(
+            -3.8, 0.25, "$a_2 = 0$", color=cut, ha="left", va="bottom", fontsize=9
+        )
+        right.set_aspect("equal")
+        right.set_xlabel("logit $a_1$")
+        right.set_ylabel("logit $a_2$")
+        right.set_title("two logits: softmax  $p_1$")
+        fig.colorbar(shades, ax=right, ticks=[0, 0.5, 1], shrink=0.8)
+    return _done(fig)
+
+
+def plot_augmentations(
+    u,
+    sampling_rate: float,
+    max_shift: int = 50,
+    seconds: float = 8.0,
+    name: str = "",
+    seed: int = 0,
+):
+    """The record ``u`` (T,) as the network sees it: unchanged, shifted, flipped.
+
+    Three rows: the original; the window moved by a random number of samples between
+    0 and ``max_shift`` (drawn from ``seed``, uniform like the training), so the signal
+    arrives earlier in it; the polarity reversed. The altered rows show the original
+    faintly behind them. ``name`` (the class) goes in the title of the first row."""
+    import matplotlib.pyplot as plt
+
+    u = _numpy(u)
+    n = int(seconds * sampling_rate)
+    t = np.arange(n) / sampling_rate
+    original = u[:n]
+    shift = int(np.random.default_rng(seed).integers(0, max_shift + 1))
+    later = f"shift: the window starts {shift / sampling_rate:.2f} s later (random)"
+    rows = [
+        (original, f"original {name}".strip()),
+        (u[shift : shift + n], later),
+        (-original, "flip: the polarity is reversed"),
+    ]
+    with plt.style.context(style("open")):
+        fig, axes = plt.subplots(3, 1, figsize=(9.0, 3.8), sharex=True, sharey=True)
+        for k, (ax, (curve, title)) in enumerate(zip(axes, rows, strict=True)):
+            if k:  # the original, faint, behind the altered record
+                ax.plot(t, original, color=_c("C6"), lw=1.0, alpha=0.35)
+            ax.plot(t, curve, color=_c("C6" if k == 0 else "C1"), lw=1.0)
+            ax.set_title(title, loc="left", fontsize=9)
+            ax.set_yticks([])
+        axes[-1].set_xlabel("time in the window (s)")
+    return _done(fig)
+
+
 # -------------------------------------------------------------- CNN explanations
 
 
@@ -164,32 +243,51 @@ def plot_arc():
     return _done(fig)
 
 
-def plot_activations(x, activations, names, sampling_rate: float):
-    """The input record above the feature maps after successive layers."""
+def plot_activations(x, activations, names, sampling_rate: float, title: str = ""):
+    """The input record above the feature maps after successive layers.
+
+    Every channel of a feature map gets the same height, so a panel is as tall as the
+    block has filters. Faint lines every 2 s run through all panels, faint ones
+    between the channels of a map, to compare when the blocks react. ``title`` is
+    written above the record."""
     import matplotlib.pyplot as plt
 
     x = _numpy(x)
+    maps = [_numpy(a) for a in activations]
+    channels = [m.shape[0] for m in maps]
+    seconds = len(x) / sampling_rate
+    ticks = np.arange(0, seconds + 1e-9, 2.0)
     with plt.style.context(style("open")):
         fig, axes = plt.subplots(
-            1 + len(activations),
+            1 + len(maps),
             1,
-            figsize=(9.0, 1.0 + 0.62 * len(activations)),
-            gridspec_kw={"height_ratios": [1.0] + [1.3] * len(activations)},
+            figsize=(12.5, 1.4 + 0.0235 * sum(channels)),
+            gridspec_kw={"height_ratios": [40] + channels},
         )
         axes[0].plot(np.arange(len(x)) / sampling_rate, x, color=_c("C6"), lw=0.7)
-        axes[0].set_xlim(0, len(x) / sampling_rate)
         axes[0].set_ylabel("input", rotation=0, ha="right", va="center")
-        for ax, a, name in zip(axes[1:], activations, names, strict=True):
-            a = _numpy(a)
+        axes[0].grid(True, axis="x", lw=0.5)
+        if title:
+            axes[0].set_title(title, loc="left")
+        for ax, m, name in zip(axes[1:], maps, names, strict=True):
             ax.imshow(
-                a,
+                m,
                 aspect="auto",
                 cmap="viridis",
                 interpolation="nearest",
-                extent=(0, len(x) / sampling_rate, a.shape[0], 0),
+                extent=(0, seconds, m.shape[0], 0),
             )
-            ax.set_ylabel(name, rotation=0, ha="right", va="center")
+            ax.hlines(
+                np.arange(1, m.shape[0]), 0, seconds, color="w", lw=0.3, alpha=0.2
+            )
+            ax.vlines(ticks, 0, m.shape[0], color="w", lw=0.5, alpha=0.3)
+            ax.set_ylabel(
+                f"{name}\n{m.shape[0]} filters", rotation=0, ha="right", va="center"
+            )
             ax.set_yticks([])
+        for ax in axes:
+            ax.set_xlim(0, seconds)
+            ax.set_xticks(ticks)
         axes[-1].set_xlabel("time (s)")
         for ax in axes[:-1]:
             ax.set_xticklabels([])
@@ -245,6 +343,57 @@ def plot_history(history: dict, ylabel: str = "loss", logy: bool = False):
     return _done(fig)
 
 
+def plot_live_length(n_live, label, classes, sampling_rate: float, window: int):
+    """How long the signal lasts in each class: the share of the records whose signal
+    (seconds before the flat padding) is shorter than the abscissa. The window the
+    network gets is marked."""
+    import matplotlib.pyplot as plt
+
+    n_live, label = _numpy(n_live), _numpy(label)
+    seconds = n_live / sampling_rate
+    with plt.style.context(style("open")):
+        fig, ax = plt.subplots(figsize=(7.5, 3.6))
+        for k, name in enumerate(classes):
+            s = np.sort(seconds[label == k])
+            share = np.arange(1, len(s) + 1) / len(s)
+            ax.step(s, share, where="post", lw=1.6, color=_colour(name), label=name)
+        ax.axvline(window / sampling_rate, color="k", lw=0.8, ls="--")
+        ax.text(window / sampling_rate + 0.8, 0.55, "window", fontsize=8)
+        ax.set_xlabel("signal before the flat padding (s)")
+        ax.set_ylabel("share of records shorter")
+        ax.set_ylim(0, 1.02)
+        ax.legend(loc="upper left")
+    return _done(fig)
+
+
+def plot_history_comparison(histories: dict):
+    """Training (dashed) and validation (solid) loss of several runs, one colour per
+    run, ``histories`` mapping a run name to its ``{"train", "validation"}`` curves."""
+    import matplotlib.pyplot as plt
+    from matplotlib.ticker import MaxNLocator
+
+    with plt.style.context(style("open")):
+        fig, ax = plt.subplots(figsize=(7.0, 3.2))
+        for k, (name, history) in enumerate(histories.items()):
+            colour = _c(f"C{k}")
+            epochs = np.arange(1, len(history["validation"]) + 1)
+            ax.plot(
+                epochs, history["validation"], color=colour, label=f"{name}, validation"
+            )
+            ax.plot(
+                epochs,
+                history["train"],
+                color=colour,
+                ls="--",
+                label=f"{name}, training",
+            )
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.set_xlabel("epoch")
+        ax.set_ylabel("loss")
+        ax.legend()
+    return _done(fig)
+
+
 def plot_recall_comparison(names, recalls: dict):
     """Recall per class for several versions of the test records, as grouped bars."""
     import matplotlib.pyplot as plt
@@ -268,16 +417,20 @@ def plot_recall_comparison(names, recalls: dict):
     return _done(fig)
 
 
-def plot_confusion(cm, names, report):
-    """Row-normalised confusion matrix next to per-class recall and precision."""
+def plot_confusion(cm, names, report, highlight: int | None = None):
+    """Row-normalised confusion matrix next to per-class recall and precision.
+
+    ``highlight`` is a class index: its row (recall) and its column (precision) are
+    outlined in the colours of the bars. The legend sits above the bars, not in them."""
     import matplotlib.pyplot as plt
+    from matplotlib.patches import Rectangle
 
     cm = np.asarray(cm)
     shares = cm / np.maximum(cm.sum(axis=1, keepdims=True), 1)
     n = len(names)
     with plt.style.context(style("open")):
         fig, (ax, bars) = plt.subplots(
-            1, 2, figsize=(9.0, 3.6), gridspec_kw={"width_ratios": [1, 1.1]}
+            1, 2, figsize=(8.0, 3.2), gridspec_kw={"width_ratios": [1, 1.1]}
         )
         ax.imshow(shares, cmap="Blues", vmin=0, vmax=1)
         for i in range(n):
@@ -291,27 +444,37 @@ def plot_confusion(cm, names, report):
                     fontsize=9,
                     color="white" if shares[i, j] > 0.5 else "black",
                 )
+        if highlight is not None:
+            k = highlight
+            for xy, w, h, colour in [
+                ((-0.5, k - 0.5), n, 1, _c("C0")),  # the row: recall
+                ((k - 0.5, -0.5), 1, n, _c("C1")),  # the column: precision
+            ]:
+                ax.add_patch(
+                    Rectangle(xy, w, h, fill=False, ec=colour, lw=2.2, clip_on=False)
+                )
         ax.set_xticks(range(n), names)
         ax.set_yticks(range(n), names)
-        ax.set_xlabel("predicted")
-        ax.set_ylabel("analyst label")
+        ax.set_xlabel("prediction")
+        ax.set_ylabel("label")
         ax.grid(False)
         positions = np.arange(n)
         bars.bar(positions - 0.2, report["recall"], 0.4, color=_c("C0"), label="recall")
         bars.bar(
             positions + 0.2, report["precision"], 0.4, color=_c("C1"), label="precision"
         )
-        bars.axhline(report["accuracy"], color="k", lw=0.8, ls="--")
-        bars.text(
-            n - 0.5,
-            report["accuracy"] + 0.02,
-            f"accuracy {report['accuracy']:.2f}",
-            ha="right",
-            fontsize=8,
+        bars.axhline(
+            report["accuracy"],
+            color="k",
+            lw=0.8,
+            ls="--",
+            label=f"accuracy {report['accuracy']:.2f}",
         )
         bars.set_xticks(positions, names)
-        bars.set_ylim(0, 1.12)
-        bars.legend(loc="lower right")
+        bars.set_ylim(0, 1.02)
+        bars.legend(
+            loc="lower center", bbox_to_anchor=(0.5, 1.0), ncol=3, borderaxespad=0.2
+        )
     return _done(fig)
 
 
@@ -338,7 +501,7 @@ def plot_probability_gallery(x, probability, label, names, indices, sampling_rat
             )
             axes[0, col].set_ylim(-1.1, 1.1)
             axes[0, col].set_yticks([])
-            axes[0, col].set_title(f"analyst: {names[label[i]]}", fontsize=9)
+            axes[0, col].set_title(f"label: {names[label[i]]}", fontsize=9)
             colours = [
                 _c("C2") if c == label[i] else _c("C6") for c in range(len(names))
             ]
@@ -355,7 +518,7 @@ def plot_probability_gallery(x, probability, label, names, indices, sampling_rat
 
 
 def plot_embedding(coords, label, classes, title="embedding, first two principal axes"):
-    """Scatter of 2-D coordinates coloured by the analyst class."""
+    """Scatter of 2-D coordinates coloured by the label."""
     import matplotlib.pyplot as plt
 
     coords, label = _numpy(coords), _numpy(label)
