@@ -197,18 +197,15 @@
         "showCode": false
       },
       {
-        "type": "fragment"
-      },
-      {
-        "type": "slide",
-        "showCode": false
-      },
-      {
-        "type": "slide",
-        "showCode": false
-      },
-      {
         "type": "skip"
+      },
+      {
+        "type": "slide",
+        "showCode": false
+      },
+      {
+        "type": "slide",
+        "showCode": false
       }
     ],
     "deck": {

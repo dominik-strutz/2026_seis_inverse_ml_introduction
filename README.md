@@ -125,12 +125,22 @@ data/       downloaded and generated data (not in git)
 
 - LeCun, Y., Bottou, L., Bengio, Y., and Haffner, P. (1998). Gradient-based learning applied to document recognition. *Proceedings of the IEEE*, 86(11), 2278–2324. doi:10.1109/5.726791
 
+**Picking phases** (Part 2d)
+
+- Zhu, W., and Beroza, G. C. (2019). PhaseNet: a deep-neural-network-based seismic arrival-time picking method. *Geophysical Journal International*, 216(1), 261–273. doi:10.1093/gji/ggy423, arXiv:1803.03211
+- Woollam, J., et al. (2022). SeisBench: a toolbox for machine learning in seismology. *Seismological Research Letters*, 93(3), 1695–1709. doi:10.1785/0220210324, arXiv:2111.00786
+- Münchmeyer, J., et al. (2022). Which picker fits my data? A quantitative evaluation of deep learning based seismic pickers. *Journal of Geophysical Research: Solid Earth*, 127, e2021JB023499. doi:10.1029/2021JB023499, arXiv:2110.13671
+- Zhu, W., et al. (2022). Earthquake phase association using a Bayesian Gaussian mixture model. *Journal of Geophysical Research: Solid Earth*, 127, e2021JB023249. doi:10.1029/2021JB023249
+- Tan, Y. J., et al. (2021). Machine-learning-based high-resolution earthquake catalog reveals how complex fault structures were activated during the 2016–2017 Central Italy sequence. *The Seismic Record*, 1(1), 11–19. doi:10.1785/0320210001
+- Mousavi, S. M., and Beroza, G. C. (2022). Deep-learning seismology. *Science*, 377, eabm4470. doi:10.1126/science.abm4470
+
 **Software and data**
 
 - Paszke, A., et al. (2019). PyTorch: an imperative style, high-performance deep learning library. *NeurIPS 32*. arXiv:1912.01703
 - Sethian, J. A. (1996). A fast marching level set method for monotonically advancing fronts. *PNAS*, 93(4), 1591–1595. doi:10.1073/pnas.93.4.1591 (travel times in the heterogeneous model, via [scikit-fmm](https://github.com/scikit-fmm/scikit-fmm))
-- Canario et al. (2020). Llaima volcano seismic event dataset (station LAV, four labelled classes). Mendeley Data, doi:10.17632/dv8nwdd36k.1 (CC BY-NC 3.0; used in Parts 2a to 2c, downloaded at run time and never redistributed here)
-- Zhu, W., Wang, H., et al. (2025). California Earthquake Dataset for Machine Learning and Cloud Computing (CEED). arXiv:2502.11500 (Southern California 2007 subset, via the AI4EPS `quakeflow_sc` repository on Hugging Face; original data from SCSN/SCEDC). Used in Part 2d, downloaded at run time and never redistributed here
+- Canário, J., de Mello, R., Curilem, M., Huenupan, F., and Rios, R. (2020). Llaima volcano dataset: in-depth comparison of deep artificial neural network architectures on seismic events classification. *Data in Brief*, 30, 105627. doi:10.1016/j.dib.2020.105627. Data: Llaima volcano seismic event dataset (station LAV, four labelled classes), Mendeley Data, doi:10.17632/dv8nwdd36k.1 (CC BY-NC 3.0; used in Parts 2a to 2c, downloaded at run time and never redistributed here)
+- Zhu, W., Wang, H., Rong, B., et al. (2025). California Earthquake Dataset for Machine Learning and Cloud Computing (CEED). arXiv:2502.11500 (Southern California 2007 subset, via the AI4EPS `quakeflow_sc` repository on Hugging Face). Used in Part 2d, downloaded at run time and never redistributed here
+- SCEDC (2013). Southern California Earthquake Data Center. Caltech. Dataset. doi:10.7909/C3WD3xH1, and Caltech (1926). Southern California Seismic Network. International Federation of Digital Seismograph Networks. doi:10.7914/SN/CI (the origin of the CEED records, cited as the SCEDC asks)
 - [marimo](https://marimo.io) notebooks and [anywidget](https://anywidget.dev) widgets.
 - U.S. Geological Survey, ANSS Comprehensive Earthquake Catalog (ComCat), 2019 Ridgecrest sequence, used for the `ridgecrest` prior: <https://earthquake.usgs.gov/fdsnws/event/1/>
 

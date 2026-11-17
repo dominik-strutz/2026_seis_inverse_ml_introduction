@@ -54,10 +54,9 @@ app = marimo.App(
         "9LHsidHlwZSI6ImZyYWdtZW50Iiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJzbGlkZSIsI"
         "nNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoiZnJhZ21lbnQiLCJzaG93Q29kZSI6ZmFsc2V9LHs"
         "idHlwZSI6InNraXAifSx7InR5cGUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlI"
-        "joic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHsidHlwZSI6ImZyYWdtZW50In0seyJ0eXBlIjo"
-        "ic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhb"
-        "HNlfSx7InR5cGUiOiJza2lwIn1dLCJkZWNrIjp7InRyYW5zaXRpb24iOiJub25lIiwidmVydGl"
-        "jYWxBbGlnbiI6InRvcCJ9fX0="
+        "joic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJzbGl"
+        "kZSIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9X"
+        "SwiZGVjayI6eyJ0cmFuc2l0aW9uIjoibm9uZSIsInZlcnRpY2FsQWxpZ24iOiJ0b3AifX19"
     ),
     css_file="lecture_slides.css",
     html_head_file="slides_head.html",
@@ -83,7 +82,7 @@ def _():
         make_pick_targets,
         prepare_ceed,
     )
-    from ml_seis.waveform_setup import ceed_card, pick_card
+    from ml_seis.waveform_setup import ceed_card, default_cache_dir, pick_card
 
     return (
         PickerExplorer,
@@ -91,6 +90,7 @@ def _():
         artifact,
         ceed_cache_path,
         ceed_card,
+        default_cache_dir,
         load_ceed,
         make_pick_targets,
         metrics,
@@ -163,11 +163,11 @@ def _(mo):
 
 
 @app.cell
-def _(mo, torch):
+def _(default_cache_dir, mo, torch):
     # more threads than physical cores can make the small convolutions many times
     # slower, and beyond six threads they gain nothing
     torch.set_num_threads(min(torch.get_num_threads(), 6))
-    cache_dir = mo.notebook_dir().parent / "data" / "waveforms"
+    cache_dir = default_cache_dir(mo.notebook_dir())
     mo.md(f"Downloaded data are cached in `{cache_dir}`.")
     return (cache_dir,)
 
@@ -227,7 +227,7 @@ def _(ceed, mo):
     ## Southern California records with analyst picks
 
     {len(ceed.p):,} three-component records (E, N, Z) at 100 Hz from the Southern
-    California Seismic Network during 2007 published in CEED dataset.
+    California Seismic Network during 2007 published in the CEED dataset.
 
     Each has an analyst's P and S pick
     """)
@@ -268,7 +268,7 @@ def _(ceed, mo):
     mo.md(f"""
     ## Split by earthquake, not by trace
 
-    Several stations record the same earthquake -> their waveforms are strongly
+    Several stations record the same earthquake, so their waveforms are strongly
     related
 
     With traces of one earthquake in both training and test data, the test score
@@ -917,29 +917,6 @@ def _(mo):
     - **Errors.** Pick errors are heavy-tailed, not the Gaussian of Part 1
     - **One earthquake at a time.** Overlapping earthquakes in one window are
       missed
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ### Sources
-
-    - Zhu and Beroza (2019), *PhaseNet*, Geophys. J. Int. 216, 261–273,
-      doi:10.1093/gji/ggy423, arXiv:1803.03211
-    - Woollam et al. (2022), *SeisBench*, Seismol. Res. Lett. 93, 1695–1709,
-      doi:10.1785/0220210324, arXiv:2111.00786
-    - Münchmeyer et al. (2022), *Which picker fits my data?*, J. Geophys. Res. Solid
-      Earth 127, e2021JB023499, doi:10.1029/2021JB023499, arXiv:2110.13671
-    - Zhu et al. (2022), *Earthquake phase association using a Bayesian Gaussian
-      mixture model*, J. Geophys. Res. Solid Earth 127, e2021JB023249,
-      doi:10.1029/2021JB023249
-    - Tan et al. (2021), *Machine-learning-based high-resolution earthquake catalog
-      ... Central Italy sequence*, The Seismic Record 1, 11–19,
-      doi:10.1785/0320210001
-    - Mousavi and Beroza (2022), *Deep-learning seismology*, Science 377, eabm4470,
-      doi:10.1126/science.abm4470
     """)
     return
 

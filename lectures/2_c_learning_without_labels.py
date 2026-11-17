@@ -43,14 +43,15 @@ app = marimo.App(
         "HsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJza2lwIn0seyJ0eXB"
         "lIjoic2tpcCJ9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJmc"
         "mFnbWVudCIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q29kZSI6ZmF"
-        "sc2V9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2tpcCJ9LHsid"
-        "HlwZSI6InNraXAifSx7InR5cGUiOiJzbGlkZSIsInNob3dDb2RlIjpmYWxzZX0seyJ0eXBlIjo"
-        "ic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJza2lwI"
-        "n0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHsidHlwZSI6ImZyYWdtZW50Iiw"
-        "ic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2xpZGUiLCJzaG93Q"
-        "29kZSI6ZmFsc2V9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2x"
-        "pZGUiLCJzaG93Q29kZSI6ZmFsc2V9XSwiZGVjayI6eyJ0cmFuc2l0aW9uIjoibm9uZSIsInZlc"
-        "nRpY2FsQWxpZ24iOiJ0b3AifX19"
+        "sc2V9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJza2lwIn0se"
+        "yJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNraXAifSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjo"
+        "ic2xpZGUiLCJzaG93Q29kZSI6ZmFsc2V9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhb"
+        "HNlfSx7InR5cGUiOiJza2lwIn0seyJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNsaWRlIiwic2h"
+        "vd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJmcmFnbWVudCIsInNob3dDb2RlIjpmYWxzZX0seyJ0e"
+        "XBlIjoic2tpcCJ9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhbHNlfSx7InR5cGUiOiJ"
+        "za2lwIn0seyJ0eXBlIjoic2tpcCJ9LHsidHlwZSI6InNsaWRlIiwic2hvd0NvZGUiOmZhbHNlf"
+        "V0sImRlY2siOnsidHJhbnNpdGlvbiI6Im5vbmUiLCJ2ZXJ0aWNhbEFsaWduIjoidG9wIn19fQ="
+        "="
     ),
     css_file="lecture_slides.css",
     html_head_file="slides_head.html",
@@ -800,6 +801,24 @@ def _(ae_run, mo, plots):
         ],
         gap=0,
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## A few labels are enough
+
+    Records of one kind should lie close together in the latent space. Three steps
+    use that, with a handful of labels
+
+    - **k-means** finds $k$ clusters of latent vectors, without labels: it alternates
+      between giving every record to its nearest centre and moving every centre to
+      the mean of its records
+    - each cluster is **named** by looking up the true label of five of its records,
+      the majority wins
+    - a record takes the name of its nearest cluster
+    """)
     return
 
 

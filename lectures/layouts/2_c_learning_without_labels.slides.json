@@ -118,6 +118,10 @@
         "showCode": false
       },
       {
+        "type": "slide",
+        "showCode": false
+      },
+      {
         "type": "skip"
       },
       {
