@@ -74,6 +74,7 @@ def _():
     from ml_seis import waveform_plotting as plots
     from ml_seis.llaimawidget import LlaimaExplorer
     from ml_seis.slides import artifact, try_it
+    from ml_seis.stepperwidget import Stepper
     from ml_seis.waveform_data import (
         LLAIMA_NAMES,
         LLAIMA_WINDOW,
@@ -81,14 +82,16 @@ def _():
         load_llaima,
         prepare_llaima,
     )
-    from ml_seis.waveform_setup import cache_ready, llaima_card
+    from ml_seis.waveform_setup import cache_ready, default_cache_dir, llaima_card
 
     return (
         LLAIMA_NAMES,
         LLAIMA_WINDOW,
         LlaimaExplorer,
+        Stepper,
         artifact,
         cache_ready,
+        default_cache_dir,
         llaima_cache_path,
         llaima_card,
         load_llaima,
@@ -169,11 +172,11 @@ def _(nn):
 
 
 @app.cell
-def _(mo, torch):
+def _(default_cache_dir, mo, torch):
     # more threads than physical cores can make the small convolutions many times
     # slower, and beyond six threads they gain nothing
     torch.set_num_threads(min(torch.get_num_threads(), 6))
-    cache_dir = mo.notebook_dir().parent / "data" / "waveforms"
+    cache_dir = default_cache_dir(mo.notebook_dir())
     mo.md(f"Downloaded data are cached in `{cache_dir}`.")
     return (cache_dir,)
 
@@ -642,20 +645,20 @@ def _(mo):
 
 
 @app.cell
-def _(llaima, mo, test_idx):
+def _(Stepper, llaima, mo, test_idx):
     # test records to page through, one class after the other: LP, TR, VT, TC, LP, ...
     _by_class = [test_idx[llaima.label[test_idx] == k][:10] for k in range(4)]
     showcase = [int(c[i]) for i in range(10) for c in _by_class]
-    record_slider = mo.ui.slider(0, len(showcase) - 1, label="record", show_value=True)
-    return record_slider, showcase
+    record_stepper = mo.ui.anywidget(Stepper(len(showcase), label="record"))
+    return record_stepper, showcase
 
 
 @app.cell(hide_code=True)
-def _(llaima, mo, plots, record_slider, showcase):
-    _j = showcase[record_slider.value]
+def _(llaima, mo, plots, record_stepper, showcase):
+    _j = showcase[record_stepper.value["value"] - 1]
     mo.vstack(
         [
-            record_slider,
+            record_stepper,
             plots.plot_augmentations(
                 llaima.u[_j, 0],
                 llaima.sampling_rate,

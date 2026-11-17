@@ -11,8 +11,6 @@ from matplotlib.figure import Figure
 
 from ml_seis import waveform_metrics as metrics
 from ml_seis import waveform_plotting as plots
-from ml_seis.locatorwidget import station_list
-from ml_seis.scene import make_scene
 
 SPECS = torch.randn(6, 65, 64)
 
@@ -21,7 +19,6 @@ def test_diagrams_and_filter_bank():
     t = np.arange(300) / 50.0
     assert isinstance(plots.plot_arc(), Figure)
     assert isinstance(plots.plot_sigmoid_softmax(), Figure)
-    assert isinstance(plots.plot_autoencoder(4160, 32), Figure)
     assert isinstance(
         plots.plot_filter_bank(t, np.sin(t), np.random.randn(3, 290), list("abc")),
         Figure,
@@ -33,15 +30,53 @@ def test_spectrogram_figures():
     assert isinstance(
         plots.plot_spectrogram_row(SPECS, classes, range(4), 47, 50.0), Figure
     )
-    grid = plots.plot_reconstruction_grid(SPECS, SPECS, classes, range(4), 47, 50.0)
-    assert isinstance(grid, Figure)
-    titles = [str(k) for k in range(8)]
-    blend = plots.plot_interpolation(SPECS[[0] * 8], titles, 47, 50.0)
-    assert isinstance(blend, Figure)
+    assert isinstance(
+        plots.plot_spectrogram_row(SPECS, classes, range(4), 25, 50.0, 128, 12.5),
+        Figure,
+    )
+    waves = np.random.randn(4, 750)
+    assert isinstance(
+        plots.plot_spectrogram_row(
+            SPECS, classes, range(4), 25, 50.0, 128, 12.5, waves=waves
+        ),
+        Figure,
+    )
+    rebuilt = plots.plot_reconstruction(
+        np.random.randn(4, 750), SPECS[:4], SPECS[2:6], classes, torch.randn(4, 4),
+        25, 50.0, 128, 12.5,
+    )  # fmt: skip
+    assert isinstance(rebuilt, Figure)
+    members = plots.plot_cluster_members(
+        np.random.randn(5, 750), SPECS[:5], [0, 1, 2, 3, 0], classes, 25, 50.0, 128
+    )
+    assert isinstance(members, Figure)
+
+
+def test_spectrogram_panel_puts_frames_at_their_centre():
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots()
+    plots._spectrogram_panel(ax, np.zeros((32, 30)), 25, 50.0, window=128, fmax=12.5)
+    left, right, bottom, top = ax.images[0].get_extent()
+    assert np.isclose(left, (128 - 25) / 2 / 50)  # a time bin is drawn at its centre
+    assert np.isclose(right - left, 30 * 25 / 50)
+    assert np.isclose(bottom, 12.5 / 32 / 2) and np.isclose(top, 12.5 + 12.5 / 32 / 2)
+    assert ax.get_ylim() == (0, 12.5)
+    plt.close(fig)
+
+
+def test_corner_figure():
+    latent = torch.randn(40, 4)
+    group = torch.arange(40) % 4
+    classes = ("LP", "TR", "VT", "TC")
+    assert isinstance(plots.plot_corner(latent), Figure)
+    assert isinstance(
+        plots.plot_corner(latent, group, classes, centres=latent[:3], title="k = 3"),
+        Figure,
+    )
 
 
 def test_bar_figures():
-    assert isinstance(plots.plot_bars(["a", "b"], [0.4, 0.9], "share"), Figure)
     curves = {"train": [1.0, 0.5], "validation": [1.1, 0.7]}
     assert isinstance(plots.plot_history_comparison({"a": curves, "b": curves}), Figure)
     recalls = {"original": np.full(4, 0.9), "noise": np.full(4, 0.8)}
@@ -75,9 +110,27 @@ def test_live_length_figure_and_baseline():
     assert predicted.tolist() == [0, 1]
 
 
-def test_handoff_figure():
-    scene = make_scene(station_list(5), "homogeneous", 0, 0.3)
-    assert isinstance(plots.plot_handoff(scene, [55.0, 45.0], [0.1, 0.5]), Figure)
+def test_split_by_event_figure_and_leak():
+    from types import SimpleNamespace
+
+    rng = np.random.default_rng(0)
+    event = np.repeat([f"e{i}" for i in range(60)], 8)
+    split = np.repeat(rng.choice(3, size=60, p=[0.7, 0.15, 0.15]), 8)
+    data = SimpleNamespace(event_id=event, split=torch.as_tensor(split))
+    assert isinstance(plots.plot_split_by_event(data, n_events=10), Figure)
+    # dealing traces at random leaks; dealing whole events does not
+    draw = metrics.random_trace_split(len(event))
+    assert metrics.trace_split_leak(event, draw) > 0.5
+    assert metrics.trace_split_leak(event, split) == 0.0
+
+
+def test_pick_figures():
+    p, s = torch.tensor([300, 310, 320]), torch.tensor([900, 950, 1000])
+    picks = np.array([[301, 905], [-1, 951], [500, -1]])
+    assert isinstance(plots.plot_pick_scatter(picks, p, s), Figure)
+    residual = np.array([0.01, -0.02, np.nan, 3.0])
+    both = {"skips": (residual, residual), "no skips": (residual, residual)}
+    assert isinstance(plots.plot_pick_residuals(both), Figure)
 
 
 def test_fill_tail_replaces_only_the_padding():

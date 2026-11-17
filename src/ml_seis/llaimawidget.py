@@ -22,13 +22,18 @@ import numpy as np
 import traitlets
 
 from .plotting import style
-from .waveform_metrics import amplitude_spectrum, log_spectrogram, record_features
+from .waveform_metrics import (
+    SPEC_WINDOW,
+    amplitude_spectrum,
+    record_features,
+    spectrogram,
+    spectrogram_axes,
+)
 from .waveform_plotting import _colour
 from .widgetkit import esm, png_data_url
 
-SPECTROGRAM_WINDOW = 128  # samples (2.6 s at 50 Hz)
-SPECTROGRAM_HOP = 16
 BAND = (10, 90)  # percentiles of the per-record spectra drawn as a band
+SPEC_RANGE = 60.0  # dB below the peak where the colour scale starts
 
 
 def _class_colours(classes) -> list[str]:
@@ -67,6 +72,12 @@ class LlaimaExplorer(anywidget.AnyWidget):
         super().__init__(**kwargs)
         self._x = data.u[:, 0].numpy()  # (N, samples)
         self._rate = float(data.sampling_rate)
+        # samples before the flat padding: the spectrogram covers only these
+        self._live = (
+            np.full(len(self._x), self._x.shape[1])
+            if data.n_live is None
+            else data.n_live.numpy()
+        )
         n, length = self._x.shape
 
         self.classes = list(data.classes)
@@ -120,13 +131,16 @@ class LlaimaExplorer(anywidget.AnyWidget):
             return
         x = self._x[k]
         freq, spectrum = amplitude_spectrum(x, self._rate)
-        spec, spec_freq, spec_time = log_spectrogram(
-            x, self._rate, SPECTROGRAM_WINDOW, SPECTROGRAM_HOP
-        )
-        dt, df = spec_time[1] - spec_time[0], spec_freq[1] - spec_freq[0]
-        # row 0 = lowest frequency; the mean-free frames leave nothing at 0 Hz, drop it
-        scaled = np.clip((spec[1:] + 60.0) / 60.0, 0, 1)
-        image = png_data_url(matplotlib.colormaps["viridis"](scaled))
+        # the spectrogram of the training target of 2c, of the live part of the record
+        # (the flat padding after it would only fill the picture with the floor)
+        live = x[: int(self._live[k])]
+        spec = spectrogram(live[None])[0].numpy()
+        row_freq, row_time = spectrogram_axes(len(live), self._rate)
+        dt, df = row_time[1] - row_time[0], row_freq[1] - row_freq[0]
+        # the colour scale covers the SPEC_RANGE dB below the peak
+        scaled = np.clip((spec - spec.max()) / SPEC_RANGE + 1.0, 0.0, 1.0)
+        viridis = matplotlib.colormaps["viridis"]
+        image = png_data_url(viridis(scaled))
         self.detail = {
             "index": int(k),
             "x": _rounded(x, 4),
@@ -134,10 +148,13 @@ class LlaimaExplorer(anywidget.AnyWidget):
             "spectrum": _rounded(spectrum[1:], 3),
             "spectrogram": {
                 "png": image,
+                "bar": png_data_url(viridis(np.linspace(0, 1, 64))[None, :, :]),
+                "range": SPEC_RANGE,
+                "window": SPEC_WINDOW / self._rate,
                 # the edges of the first and last cell, not their centres
-                "t0": float(spec_time[0] - dt / 2),
-                "t1": float(spec_time[-1] + dt / 2),
-                "f0": float(spec_freq[1] - df / 2),
-                "f1": float(spec_freq[-1] + df / 2),
+                "t0": float(row_time[0] - dt / 2),
+                "t1": float(row_time[-1] + dt / 2),
+                "f0": float(row_freq[0] - df / 2),
+                "f1": float(row_freq[-1] + df / 2),
             },
         }

@@ -131,6 +131,46 @@ def artifact(
     )
 
 
+def paper_figure(name: str, local_dir=None, max_height: int = 520):
+    """A figure from a paper, with its credit line; a citation card when it is missing.
+
+    ``artifacts/papers/papers.json`` lists every figure of the deck: the citation, the
+    doi, the licence and, for figures that may be redistributed (CC BY), the file that
+    ships in ``artifacts/papers/``. Other figures are never committed: if
+    ``<local_dir>/<name>.png`` (or .jpg) exists on this machine it is shown, otherwise
+    the slide shows the citation, so the deck runs offline and on molab.
+    """
+    import base64
+
+    import marimo as mo
+
+    folder = _ARTIFACTS / "papers"
+    entry = json.loads((folder / "papers.json").read_text(encoding="utf-8"))[name]
+    path = folder / entry["file"] if entry.get("file") else None
+    if path is None and local_dir is not None:
+        for suffix in (".png", ".jpg", ".jpeg"):
+            if (Path(local_dir) / f"{name}{suffix}").exists():
+                path = Path(local_dir) / f"{name}{suffix}"
+                break
+    credit = (
+        f"{entry['citation']}, doi:{entry['doi']}; "
+        f"{entry['figure']}; {entry['licence']}"
+    )
+    if path is None:
+        return mo.md(
+            f"**{entry['citation']}**\n\ndoi:{entry['doi']}: {entry['figure']}"
+        )
+    mime = "image/png" if path.suffix == ".png" else "image/jpeg"
+    data = base64.b64encode(path.read_bytes()).decode()
+    return mo.Html(
+        f'<figure style="margin:0;text-align:center"><img alt="{escape(name)}" '
+        f'style="max-height:{max_height}px;max-width:100%" '
+        f'src="data:{mime};base64,{data}">'
+        f'<figcaption style="font-size:11px;opacity:.7">{escape(credit)}</figcaption>'
+        "</figure>"
+    )
+
+
 def show_source(*functions):
     """Print the source of functions from ``ml_seis.physics`` as a code block.
 

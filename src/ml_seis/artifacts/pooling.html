@@ -202,9 +202,8 @@
     $("eq").innerHTML = `<math><msub><mrow><msup><mi>h</mi><mo>′</mo></msup></mrow><mi>j</mi></msub><mo>=</mo>
       <munder><mi>max</mi><mrow><mi>i</mi><mo>∈</mo><mtext>group </mtext><mi>j</mi></mrow></munder>
       <msub><mi>h</mi><mi>i</mi></msub></math>`;
-    $("r1").innerHTML = `Each group of <b>${p}</b> neighbours keeps its largest value:
-      <b>${N}</b> units become <b>${G}</b>.`;
-    $("r2").innerHTML = `A filter of length 3 on the short map spans <b>${3 * p}</b> units of the long one.`;
+    $("r1").innerHTML = `window <b>${p}</b>: <b>${N}</b> to <b>${G}</b> units`;
+    $("r2").innerHTML = `a filter of length 3 spans <b>${3 * p}</b> units`;
   }
 
   const seg = $("seg-p");

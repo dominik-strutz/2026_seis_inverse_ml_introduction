@@ -332,7 +332,8 @@ function render({ model, el }) {
   function drawSpectrogram(k, detail) {
     const { t, b } = PANEL, l = LEFT, r = RIGHT;
     const ymap = (v) => b - v / FMAX * (b - t);
-    title("spectrogram, dB below its maximum");
+    const win = ready(detail, k) ? `, ${detail.spectrogram.window.toFixed(1)} s window` : "";
+    title(`spectrogram, power in dB below its peak${win}`);
     zoomHint();
     openAxes(l, t, r, b, { x0: zoom[0], x1: zoom[1], yticks: niceTicks(0, FMAX), ymap,
       xlabel: "time (s)" });
@@ -346,9 +347,33 @@ function render({ model, el }) {
     ctx.beginPath(); ctx.rect(l, t, r - l, b - t); ctx.clip();
     const x0 = timeToX(sp.t0), x1 = timeToX(sp.t1);
     const y1 = ymap(sp.f1), y0 = ymap(sp.f0);
-    ctx.imageSmoothingEnabled = false;  // one block per time-frequency cell
+    ctx.imageSmoothingEnabled = false;  // one block per time-frequency cell, as ObsPy
     ctx.drawImage(specImage, x0, y1, x1 - x0, y0 - y1);
     ctx.restore();
+    colourBar(sp, t, b);
+  }
+
+  // the colour scale left of the axes: the peak at the top, `range` dB below it at the bottom
+  const barImage = new Image();
+  let barSrc = "";
+  barImage.onload = () => draw();
+  function colourBar(sp, t, b) {
+    const bx = LEFT - 64, bw = 10, bh = b - t;
+    if (barSrc !== sp.bar) { barSrc = sp.bar; barImage.src = sp.bar; return; }
+    if (barImage.complete && barImage.naturalWidth) {
+      ctx.save(); ctx.translate(bx, b); ctx.rotate(-Math.PI / 2);
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(barImage, 0, 0, bh, bw);  // the bar image runs low -> high
+      ctx.restore();
+    }
+    ctx.strokeStyle = C.ink2; ctx.lineWidth = 0.8; ctx.strokeRect(bx, t, bw, bh);
+    text("dB", bx + bw, t - 14, C.ink2, "right", 10);
+    for (let v = 0; v >= -sp.range; v -= 20) {
+      const y = t + bh * (-v / sp.range);
+      ctx.beginPath(); ctx.moveTo(bx, y); ctx.lineTo(bx + 3, y); ctx.stroke();
+      text(v === 0 ? "0" : `−${-v}`, bx - 4, y + (v === 0 ? 8 : v === -sp.range ? 0 : 3.5),
+        C.ink2, "right", 10);
+    }
   }
 
   function drawWaveform(k, detail) {

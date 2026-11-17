@@ -232,7 +232,7 @@ def plot_arc():
         arrow(18, 20, 26, 20)
         answers = [
             (31, "one class per record\n(2b)", _c("C2")),
-            (17.5, "a code, no labels\n(2c)", _c("C4")),
+            (17.5, "latent vector, no labels\n(2c)", _c("C4")),
             (4, "P and S at every sample\n(2d)", _c("C1")),
         ]
         for y, text, colour in answers:
@@ -378,12 +378,17 @@ def plot_history_comparison(histories: dict):
             colour = _c(f"C{k}")
             epochs = np.arange(1, len(history["validation"]) + 1)
             ax.plot(
-                epochs, history["validation"], color=colour, label=f"{name}, validation"
+                epochs,
+                history["validation"],
+                color=colour,
+                lw=2.2,
+                label=f"{name}, validation",
             )
             ax.plot(
                 epochs,
                 history["train"],
                 color=colour,
+                lw=2.2,
                 ls="--",
                 label=f"{name}, training",
             )
@@ -417,7 +422,7 @@ def plot_recall_comparison(names, recalls: dict):
     return _done(fig)
 
 
-def plot_confusion(cm, names, report, highlight: int | None = None):
+def plot_confusion(cm, names, report, highlight: int | None = None, figsize=(8.0, 3.2)):
     """Row-normalised confusion matrix next to per-class recall and precision.
 
     ``highlight`` is a class index: its row (recall) and its column (precision) are
@@ -430,7 +435,7 @@ def plot_confusion(cm, names, report, highlight: int | None = None):
     n = len(names)
     with plt.style.context(style("open")):
         fig, (ax, bars) = plt.subplots(
-            1, 2, figsize=(8.0, 3.2), gridspec_kw={"width_ratios": [1, 1.1]}
+            1, 2, figsize=figsize, gridspec_kw={"width_ratios": [1, 1.1]}
         )
         ax.imshow(shares, cmap="Blues", vmin=0, vmax=1)
         for i in range(n):
@@ -541,295 +546,282 @@ def plot_embedding(coords, label, classes, title="embedding, first two principal
     return _done(fig)
 
 
-def plot_cluster_embedding(coords, recovered, label, classes, centres):
-    """Same 2-D map twice: classes recovered by clustering, then analyst classes.
-
-    ``coords`` are the first two principal coordinates of the code; ``centres`` are
-    the cluster centres in the same two coordinates, drawn as their index.
-    """
-    import matplotlib.pyplot as plt
-
-    coords, centres = _numpy(coords), _numpy(centres)
-    recovered, label = _numpy(recovered), _numpy(label)
-    panels = (
-        (recovered, "recovered by clustering the code"),
-        (label, "analyst label (only for checking)"),
-    )
-    with plt.style.context(style("open")):
-        fig, axes = plt.subplots(1, 2, figsize=(9.0, 4.0), sharex=True, sharey=True)
-        for ax, (colour_by, title) in zip(axes, panels, strict=True):
-            for k, name in enumerate(classes):
-                m = colour_by == k
-                ax.scatter(
-                    *coords[m].T,
-                    s=8,
-                    alpha=0.7,
-                    color=_colour(name),
-                    label=name,
-                    edgecolors="none",
-                )
-            ax.set_title(title)
-            ax.set_xlabel("axis 1")
-        for j, (cx, cy) in enumerate(centres):
-            axes[0].text(cx, cy, str(j), ha="center", va="center", fontsize=7)
-        axes[0].set_ylabel("axis 2")
-        axes[1].legend(markerscale=2)
-    return _done(fig)
-
-
 # --------------------------------------------------------- autoencoder / U-Net
 
 
-def _spectrogram_panel(ax, spec, hop, sampling_rate):
-    """Draw one log-spectrogram panel with time and frequency axes."""
+def _spectrogram_panel(
+    ax, spec, hop, sampling_rate, window=None, fmax=None, fmin=None, **kwargs
+):
+    """Draw one spectrogram panel with time and frequency axes, as ObsPy does.
+
+    ``spec`` is (frequency, time bin). Its rows are centred on frequencies from
+    ``fmin`` to ``fmax`` (Hz), evenly spaced; by default ``fmin`` is the spacing
+    itself, so the rows are ``df``, ``2 df``, ... ``fmax`` (the zero frequency is
+    dropped, as in ObsPy; ``fmax`` is the Nyquist frequency by default). A window of
+    ``window`` samples that starts ``hop`` samples after the last gives one time bin,
+    drawn at its centre, ``window / 2`` samples after its start; without ``window``
+    the time bins are drawn from time zero."""
+    window = hop if window is None else window
+    n_rows = spec.shape[-2]
+    top = sampling_rate / 2 if fmax is None else fmax
+    bottom = top / n_rows if fmin is None else fmin
+    half_row = (top - bottom) / (n_rows - 1) / 2 if n_rows > 1 else top / 2
+    start = (window - hop) / 2 / sampling_rate  # the left edge of the first time bin
     ax.imshow(
         spec,
         aspect="auto",
         origin="lower",
         cmap="viridis",
         interpolation="nearest",
-        extent=(0, spec.shape[-1] * hop / sampling_rate, 0, sampling_rate / 2),
+        extent=(
+            start,
+            start + spec.shape[-1] * hop / sampling_rate,
+            bottom - half_row,
+            top + half_row,
+        ),
+        **kwargs,
     )
+    ax.set_xlim(0, start + spec.shape[-1] * hop / sampling_rate)
+    ax.set_ylim(0, top if fmin is None else top + half_row)
 
 
-def plot_spectrogram_row(spec, classes, indices, hop, sampling_rate):
-    """One spectrogram per class in a row: what the autoencoder sees and rebuilds."""
+def plot_spectrogram_row(
+    spec,
+    classes,
+    indices,
+    hop,
+    sampling_rate,
+    window=None,
+    fmax=None,
+    waves=None,
+    fmin=None,
+):
+    """One record per class in a row: what the autoencoder sees and rebuilds.
+
+    Every spectrogram has its own colour scale, from its smallest to its largest
+    value, as in ObsPy. ``window`` is the length of a window in samples, ``fmax`` the
+    frequency (Hz) of the top row. With ``waves`` (one record per index, in samples)
+    each waveform is drawn above its spectrogram."""
     import matplotlib.pyplot as plt
 
     spec = _numpy(spec)
+    rows = 1 if waves is None else 2
     with plt.style.context(style("open")):
         fig, axes = plt.subplots(
-            1, len(indices), figsize=(9.0, 2.6), sharex=True, sharey=True
-        )
-        for ax, name, i in zip(np.atleast_1d(axes), classes, indices, strict=True):
-            _spectrogram_panel(ax, spec[i], hop, sampling_rate)
-            ax.set_title(name, fontsize=9)
-            ax.set_xlabel("time (s)")
-        np.atleast_1d(axes)[0].set_ylabel("frequency (Hz)")
-    return _done(fig)
-
-
-def plot_reconstruction_grid(spec, spec_hat, classes, indices, hop, sampling_rate):
-    """Original spectrograms (top row) and what the network rebuilds (bottom row)."""
-    import matplotlib.pyplot as plt
-
-    spec, spec_hat = _numpy(spec), _numpy(spec_hat)
-    with plt.style.context(style("open")):
-        fig, axes = plt.subplots(
-            2, len(indices), figsize=(9.0, 3.8), sharex=True, sharey=True, squeeze=False
-        )
+            rows, len(indices), figsize=(9.0, 2.6 if waves is None else 3.9),
+            sharex=True, squeeze=False,
+            gridspec_kw={"height_ratios": [1] if waves is None else [1, 1.6]},
+        )  # fmt: skip
         for col, (name, i) in enumerate(zip(classes, indices, strict=True)):
-            _spectrogram_panel(axes[0, col], spec[i], hop, sampling_rate)
-            _spectrogram_panel(axes[1, col], spec_hat[i], hop, sampling_rate)
+            if waves is not None:
+                wave = _numpy(waves[col])
+                t = np.arange(len(wave)) / sampling_rate
+                axes[0, col].plot(t, wave, color=_colour(name), lw=0.7)
+                axes[0, col].set_yticks([])
             axes[0, col].set_title(name, fontsize=9)
-            axes[1, col].set_xlabel("time (s)")
-        axes[0, 0].set_ylabel("original\nfrequency (Hz)")
-        axes[1, 0].set_ylabel("rebuilt from z\nfrequency (Hz)")
+            ax = axes[-1, col]
+            _spectrogram_panel(ax, spec[i], hop, sampling_rate, window, fmax, fmin)
+            ax.set_xlabel("time (s)")
+            if col:
+                ax.set_yticks([])
+        axes[-1, 0].set_ylabel("frequency (Hz)")
+        if waves is not None:
+            axes[0, 0].set_ylabel("waveform")
     return _done(fig)
 
 
-def plot_interpolation(specs, titles, hop, sampling_rate, columns: int = 4):
-    """Spectrograms in a grid, row by row: two records and what lies between them."""
+def plot_reconstruction(
+    waves,
+    specs,
+    specs_hat,
+    names,
+    latents,
+    hop,
+    sampling_rate,
+    window=None,
+    fmax=None,
+    fmin=None,
+):
+    """One record per class, its spectrogram and what the decoder rebuilds.
+
+    One row per record: ``waves`` (record, sample), ``specs`` and ``specs_hat``
+    (record, frequency, time bin), ``names`` the records' classes and ``latents``
+    (record, number) their numbers z. In a row the two spectrograms share one colour
+    scale; ``window`` is the length of a window in samples and ``fmax`` the frequency
+    (Hz) of their top row."""
     import matplotlib.pyplot as plt
 
-    specs = _numpy(specs)
-    rows = -(-len(specs) // columns)
+    waves, specs, specs_hat = _numpy(waves), _numpy(specs), _numpy(specs_hat)
+    latents = _numpy(latents)
+    rows = len(waves)
+    length = waves.shape[-1] / sampling_rate
+    t = np.arange(waves.shape[-1]) / sampling_rate
     with plt.style.context(style("open")):
         fig, axes = plt.subplots(
-            rows, columns, figsize=(9.0, 1.9 * rows), sharex=True, sharey=True,
-            squeeze=False,
-        )  # fmt: skip
-        for ax in axes.flat:
-            ax.axis("off")
-        for ax, spec, title in zip(axes.flat, specs, titles, strict=False):
-            ax.axis("on")
-            _spectrogram_panel(ax, spec, hop, sampling_rate)
-            ax.set_title(title, fontsize=9)
+            rows, 3, figsize=(11.0, 1.55 * rows + 0.5), sharex=True, squeeze=False
+        )
         for row in range(rows):
-            axes[row, 0].set_ylabel("frequency (Hz)")
-        for col in range(columns):
+            low, high = float(specs[row].min()), float(specs[row].max())
+            axes[row, 0].plot(t, waves[row], color=_colour(names[row]), lw=0.7)
+            axes[row, 0].set_yticks([])
+            numbers = ", ".join(f"{v:.1f}" for v in latents[row])
+            axes[row, 0].set_ylabel(f"{names[row]}\nz = ({numbers})", fontsize=8)
+            for ax, panel in zip(
+                axes[row, 1:], (specs[row], specs_hat[row]), strict=True
+            ):
+                _spectrogram_panel(
+                    ax, panel, hop, sampling_rate, window, fmax, fmin,
+                    vmin=low, vmax=high,
+                )  # fmt: skip
+                if ax is axes[row, 2]:
+                    ax.set_yticks([])
+                else:
+                    ax.set_ylabel("frequency (Hz)", fontsize=8)
+        for col, title in enumerate(("waveform", "spectrogram", "rebuilt")):
+            axes[0, col].set_title(title, fontsize=9)
             axes[-1, col].set_xlabel("time (s)")
+        axes[0, 0].set_xlim(0, length)
     return _done(fig)
 
 
-def plot_bars(labels, values, xlabel: str, baseline: float | None = None):
-    """Horizontal bars of shares in [0, 1]; ``baseline`` draws a dashed line."""
+def plot_cluster_members(
+    waves,
+    specs,
+    label,
+    classes,
+    hop,
+    sampling_rate,
+    window=None,
+    fmax=None,
+    fmin=None,
+    figsize=(9.0, 3.4),
+):
+    """Records of one cluster, one column each: waveform above, spectrogram below.
+
+    Each column is titled with the record's true label, and the waveform is drawn in
+    that class's colour."""
     import matplotlib.pyplot as plt
 
-    with plt.style.context(style("open")):
-        fig, ax = plt.subplots(figsize=(6.0, 0.9 + 0.45 * len(values)))
-        ax.barh(np.arange(len(values)), values, color=_c("C0"), height=0.6)
-        ax.set_yticks(np.arange(len(values)), labels)
-        ax.invert_yaxis()
-        ax.set_xlim(0, 1)
-        ax.set_xlabel(xlabel)
-        if baseline is not None:
-            ax.axvline(baseline, color=_c("C6"), ls="--", lw=1.0)
-    return _done(fig)
-
-
-def plot_autoencoder(input_numbers: int, code_numbers: int):
-    """Encoder, code and decoder as a funnel; the loss compares input and output."""
-    import matplotlib.pyplot as plt
-    from matplotlib.patches import FancyArrowPatch, Polygon, Rectangle
-
-    with plt.style.context(style("open")):
-        fig, ax = plt.subplots(figsize=(9.0, 3.2))
-        ax.set_xlim(0, 100)
-        ax.set_ylim(0, 36)
-        ax.axis("off")
-        blue, ink2 = _c("C0"), _c("C6")
-
-        def label(x, y, text, size=10):
-            ax.text(x, y, text, ha="center", va="center", fontsize=size)
-
-        ax.add_patch(Rectangle((2, 8), 12, 20, fc="none", ec=ink2, lw=1.2))
-        label(8, 18, "spectrogram\n$\\mathbf{s}$")
-        label(8, 31, f"{input_numbers:,} numbers", 9)
-        label(92, 31, f"{input_numbers:,} numbers", 9)
-        ax.add_patch(
-            Polygon([(18, 6), (18, 30), (44, 21), (44, 15)], fc="none", ec=blue)
-        )
-        label(31, 18, "encoder")
-        ax.add_patch(Rectangle((46, 14), 8, 8, fc="none", ec=_c("C1"), lw=1.6))
-        label(50, 18, "$\\mathbf{z}$")
-        label(50, 9.5, f"code: {code_numbers} numbers", 9)
-        ax.add_patch(
-            Polygon([(56, 15), (56, 21), (82, 30), (82, 6)], fc="none", ec=blue)
-        )
-        label(69, 18, "decoder")
-        ax.add_patch(Rectangle((86, 8), 12, 20, fc="none", ec=ink2, lw=1.2))
-        label(92, 18, "rebuilt\n$\\hat{\\mathbf{s}}$")
-        for x0, x1 in [(14, 18), (44, 46), (54, 56), (82, 86)]:
-            ax.add_patch(
-                FancyArrowPatch(
-                    (x0, 18), (x1, 18), arrowstyle="-|>", mutation_scale=10,
-                    color=ink2, lw=1.0, shrinkA=0, shrinkB=0,
-                )
-            )  # fmt: skip
-        ax.annotate(
-            "", xy=(8, 3), xytext=(92, 3),
-            arrowprops=dict(arrowstyle="<->", color=_c("C1"), lw=1.0),
-        )  # fmt: skip
-        label(50, 5.2, "loss: squared difference of the two", 9)
-    return _done(fig)
-
-
-def plot_class_prototypes(decoded, names, sizes, classes, hop, sampling_rate):
-    """Decoded cluster centres averaged per recovered class name."""
-    import matplotlib.pyplot as plt
-
-    decoded, names, sizes = _numpy(decoded), _numpy(names), _numpy(sizes)
+    waves, specs, label = _numpy(waves), _numpy(specs), _numpy(label)
+    n = len(waves)
     with plt.style.context(style("open")):
         fig, axes = plt.subplots(
-            1, len(classes), figsize=(9.0, 2.6), sharex=True, sharey=True
-        )
-        for ax, (index, name) in zip(
-            np.atleast_1d(axes), enumerate(classes), strict=True
-        ):
-            members = names == index
-            weight = sizes[members][:, None, None]
-            prototype = (
-                (decoded[members] * weight).sum(0) / weight.sum()
-                if weight.sum() > 0
-                else np.zeros_like(decoded[0])
+            2, n, figsize=figsize, sharex=True, squeeze=False,
+            gridspec_kw={"height_ratios": [1, 1.3]},
+        )  # fmt: skip
+        for col in range(n):
+            name = classes[int(label[col])]
+            t = np.arange(waves.shape[-1]) / sampling_rate
+            axes[0, col].plot(t, waves[col], color=_colour(name), lw=0.7)
+            axes[0, col].set_title(name, fontsize=9)
+            axes[0, col].set_yticks([])
+            _spectrogram_panel(
+                axes[1, col], specs[col], hop, sampling_rate, window, fmax, fmin
             )
-            _spectrogram_panel(ax, prototype, hop, sampling_rate)
-            ax.set_title(f"{name} (n={int(sizes[members].sum())})", fontsize=9)
-        np.atleast_1d(axes)[0].set_ylabel("frequency (Hz)")
-        np.atleast_1d(axes)[0].set_yticks([0, sampling_rate / 4, sampling_rate / 2])
-        np.atleast_1d(axes)[-1].set_xlabel("time (s)")
+            axes[1, col].set_xlabel("time (s)")
+            if col:
+                axes[1, col].set_yticks([])
+        axes[0, 0].set_ylabel("waveform")
+        axes[1, 0].set_ylabel("frequency (Hz)")
+    return _done(fig)
+
+
+def _cluster_colours(k, saturation=0.45, value=0.93):
+    """k well separated hex colours for clusters; they mean nothing. Pale by default
+    so that they stay off the saturated class colours."""
+    from colorsys import hsv_to_rgb
+
+    return [
+        to_hex(hsv_to_rgb((0.08 + 0.618 * j) % 1.0, saturation, value))
+        for j in range(k)
+    ]
+
+
+def plot_corner(latent, group=None, classes=None, centres=None, title="", size=5.2):
+    """Corner plot of a latent vector: every pair of numbers, no marginals.
+
+    ``latent`` is (records, d); the grid is (d - 1) by (d - 1), the panels below
+    the diagonal only, so that it can be as large as possible. ``group`` colours
+    the records by class index into ``classes``; without it they are grey, as an
+    unlabelled latent vector is. ``centres`` (k, d) are drawn as their index in
+    the panels. The figure is ``size`` inches square."""
+    import matplotlib.pyplot as plt
+
+    latent = _numpy(latent)
+    d = latent.shape[1]
+    n = d - 1
+    low, high = np.percentile(latent, 0.5, axis=0), np.percentile(latent, 99.5, axis=0)
+    pad = 0.08 * (high - low)
+    low, high = low - pad, high + pad
+    with plt.style.context(style("open")):
+        fig, axes = plt.subplots(n, n, figsize=(size, size), squeeze=False)
+        sets = (
+            [(np.ones(len(latent), bool), _c("C6"), None)]
+            if group is None
+            else [
+                (_numpy(group) == k, _colour(name), name)
+                for k, name in enumerate(classes)
+            ]
+        )
+        for r in range(n):
+            for j in range(n):
+                ax = axes[r, j]
+                i = r + 1  # the number on the vertical axis
+                if j > r:
+                    ax.axis("off")
+                    continue
+                for mask, colour, _ in sets:
+                    ax.scatter(
+                        latent[mask, j], latent[mask, i], s=9, alpha=0.6,
+                        color=colour, edgecolors="none",
+                    )  # fmt: skip
+                ax.set_xlim(low[j], high[j])
+                ax.set_ylim(low[i], high[i])
+                if r < n - 1:
+                    ax.set_xticklabels([])
+                else:
+                    ax.set_xlabel(f"$z_{j + 1}$", fontsize=14)
+                    ax.tick_params(labelsize=10)
+                if j > 0:
+                    ax.set_yticklabels([])
+                else:
+                    ax.set_ylabel(f"$z_{i + 1}$", fontsize=14)
+                    ax.tick_params(labelsize=10)
+        if centres is not None:
+            centres = _numpy(centres)
+            for r in range(n):
+                for j in range(r + 1):
+                    for index, c in enumerate(centres):
+                        axes[r, j].text(
+                            c[j], c[r + 1], str(index), ha="center", va="center",
+                            fontsize=11, fontweight="bold", color="black",
+                            bbox=dict(boxstyle="circle,pad=0.25", fc="white",
+                                      ec="black", lw=1.0, alpha=0.95),
+                        )  # fmt: skip
+        if group is not None:
+            handles = [
+                plt.Line2D([], [], marker="o", ls="", color=colour, label=name)
+                for _, colour, name in sets
+            ]
+            fig.legend(
+                handles=handles, loc="upper right", bbox_to_anchor=(0.98, 0.96),
+                frameon=False, fontsize=13, markerscale=1.6,
+            )  # fmt: skip
+        if title:
+            fig.text(0.98, 0.5 if n > 1 else 0.9, title, ha="right", va="center",
+                     fontsize=13, wrap=True)  # fmt: skip
     return _done(fig)
 
 
 # ------------------------------------------------------------------- CEED / picks
 
 
-def plot_ceed_overview(data):
-    """Where the retained events and stations are, and how S-P time maps to distance."""
-    import matplotlib.pyplot as plt
+def plot_targets(x, target, p, s, sampling_rate: float = 100.0, margin: float = 1.5):
+    """One cropped record with the soft P / S / neither target curves beneath it.
 
-    split = _numpy(data.split)
-    s_minus_p = _numpy(data.s - data.p) / 100.0
-    with plt.style.context(style("boxed")):
-        fig, (ax_map, ax_sp) = plt.subplots(
-            1, 2, figsize=(9.0, 4.0), gridspec_kw={"width_ratios": [1.1, 1]}
-        )
-        stations = np.unique(data.station_lonlat, axis=0)
-        ax_map.scatter(
-            *stations.T, marker="^", s=18, color=_c("C6"), label="stations", zorder=2
-        )
-        for k, name in enumerate(("train", "validation", "test")):
-            m = split == k
-            ax_map.scatter(
-                *data.event_lonlat[m].T,
-                s=5,
-                alpha=0.5,
-                color=_c(f"C{[0, 3, 1][k]}"),
-                label=f"{name} events",
-                zorder=3,
-                edgecolors="none",
-            )
-        ax_map.set_xlabel("longitude (deg)")
-        ax_map.set_ylabel("latitude (deg)")
-        ax_map.set_aspect(1 / np.cos(np.deg2rad(34.5)))
-        ax_map.legend(markerscale=1.5, fontsize=7, loc="upper right")
-        ax_sp.scatter(
-            data.distance_km,
-            s_minus_p,
-            s=5,
-            alpha=0.4,
-            color=_c("C0"),
-            edgecolors="none",
-        )
-        ax_sp.set_xlabel("epicentral distance (km)")
-        ax_sp.set_ylabel("S - P time (s)")
-        ax_sp.set_title("S - P time grows with distance")
-    return _done(fig)
-
-
-def plot_ceed_examples(data, indices):
-    """Three-component records with the analyst P and S picks (relative to P)."""
-    import matplotlib.pyplot as plt
-
-    x = _numpy(data.u)
-    with plt.style.context(style("open")):
-        fig, axes = plt.subplots(
-            3, len(indices), figsize=(9.0, 3.9), sharey="col", squeeze=False
-        )
-        t = (np.arange(x.shape[-1]) - 0) / 100.0
-        for col, i in enumerate(indices):
-            p, s = int(data.p[i]), int(data.s[i])
-            lo, hi = max(p - 600, 0), min(s + 800, x.shape[-1])
-            for row, name in enumerate("ENZ"):
-                ax = axes[row, col]
-                ax.plot(
-                    t[lo:hi] - t[p],
-                    x[i, row, lo:hi],
-                    color=_c(COMPONENT_COLOURS[row]),
-                    lw=0.6,
-                )
-                ax.axvline(0.0, color=_c(PHASE_COLOURS["P"]), lw=1.0)
-                ax.axvline((s - p) / 100.0, color=_c(PHASE_COLOURS["S"]), lw=1.0)
-                ax.set_yticks([])
-                if col == 0:
-                    ax.set_ylabel(name, rotation=0, ha="right", va="center")
-                if row < 2:
-                    ax.set_xticklabels([])
-            axes[0, col].set_title(
-                f"{data.station[i]}  {data.distance_km[i]:.0f} km"
-                f"  M{data.magnitude[i]:.1f}",
-                fontsize=8,
-            )
-            axes[2, col].set_xlabel("time from P (s)")
-        for name, label in (("P", "analyst P"), ("S", "analyst S")):
-            axes[0, 0].plot([], [], color=_c(PHASE_COLOURS[name]), label=label)
-        axes[0, 0].legend(loc="upper left", fontsize=7)
-    return _done(fig)
-
-
-def plot_targets(x, target, p, s, sampling_rate: float = 100.0):
-    """One cropped record with the soft P / S / neither target curves beneath it."""
+    The time axis is zoomed to ``margin`` seconds before the P pick and after the S
+    pick, so the width of the target peaks is visible; ``margin=None`` shows it all.
+    """
     import matplotlib.pyplot as plt
 
     x, target = _numpy(x), _numpy(target)
@@ -838,119 +830,77 @@ def plot_targets(x, target, p, s, sampling_rate: float = 100.0):
         fig, (ax_x, ax_t) = plt.subplots(
             2,
             1,
-            figsize=(9.0, 3.8),
+            figsize=(11.5, 4.6),
             sharex=True,
-            gridspec_kw={"height_ratios": [1.4, 1]},
+            gridspec_kw={"height_ratios": [1.8, 1]},
         )
+        # each component on its own scale, one unit apart, so a weak P stays visible
         for row in range(3):
             ax_x.plot(
                 t,
-                x[row] + 2.2 * (2 - row) * np.abs(x).max() / 3,
+                0.42 * x[row] / np.abs(x[row]).max() + (2 - row),
                 color=_c(COMPONENT_COLOURS[row]),
-                lw=0.6,
+                lw=1.0,
             )
-        ax_x.set_yticks([])
-        ax_x.set_ylabel("E, N, Z")
+        ax_x.set_yticks([0, 1, 2], ["Z", "N", "E"])
+        ax_x.set_ylim(-0.6, 2.6)
         for ax in (ax_x, ax_t):
-            ax.axvline(p / sampling_rate, color=_c(PHASE_COLOURS["P"]), lw=0.8, ls=":")
-            ax.axvline(s / sampling_rate, color=_c(PHASE_COLOURS["S"]), lw=0.8, ls=":")
+            ax.axvline(p / sampling_rate, color=_c(PHASE_COLOURS["P"]), lw=1.4, ls="--")
+            ax.axvline(s / sampling_rate, color=_c(PHASE_COLOURS["S"]), lw=1.4, ls="--")
         for row, name in enumerate(("P", "S", "neither")):
-            ax_t.plot(t, target[row], color=_c(PHASE_COLOURS[name]), label=name)
+            ax_t.plot(t, target[row], color=_c(PHASE_COLOURS[name]), lw=2.4, label=name)
         ax_t.set_ylim(-0.05, 1.1)
         ax_t.set_xlabel("time (s)")
         ax_t.set_ylabel("target")
-        ax_t.legend(ncol=3, loc="center right", fontsize=8)
+        ax_t.legend(ncol=3, loc="center", fontsize=8)
+        if margin is not None:
+            ax_t.set_xlim(
+                max(0.0, p / sampling_rate - margin),
+                min(t[-1], s / sampling_rate + margin),
+            )
     return _done(fig)
 
 
-def plot_picker_examples(x, probability, p, s, picks, sampling_rate: float = 100.0):
-    """Vertical-component records with predicted P/S curves and the picks taken."""
-    import matplotlib.pyplot as plt
+def plot_pick_residuals(residuals: dict, limit: float = 1.0):
+    """Histograms of predicted minus analyst pick time (P, S), log counts.
 
-    x, probability = _numpy(x), _numpy(probability)
-    k = len(x)
-    t = np.arange(x.shape[-1]) / sampling_rate
-    with plt.style.context(style("open")):
-        fig, axes = plt.subplots(
-            2,
-            k,
-            figsize=(9.0, 3.8),
-            sharex="col",
-            squeeze=False,
-            gridspec_kw={"height_ratios": [1.3, 1]},
-        )
-        for col in range(k):
-            ax_x, ax_p = axes[0, col], axes[1, col]
-            ax_x.plot(t, x[col, 2], color=_c(COMPONENT_COLOURS[2]), lw=0.6)
-            ax_x.set_yticks([])
-            for ax in (ax_x, ax_p):
-                ax.axvline(
-                    float(p[col]) / sampling_rate,
-                    color=_c(PHASE_COLOURS["P"]),
-                    lw=0.9,
-                    ls=":",
-                )
-                ax.axvline(
-                    float(s[col]) / sampling_rate,
-                    color=_c(PHASE_COLOURS["S"]),
-                    lw=0.9,
-                    ls=":",
-                )
-            for phase, name in enumerate(("P", "S")):
-                if picks[col][phase] >= 0:
-                    ax_x.axvline(
-                        picks[col][phase] / sampling_rate,
-                        color=_c(PHASE_COLOURS[name]),
-                        lw=0.9,
-                        ls="--",
-                    )
-            ax_p.plot(
-                t, probability[col, 0], color=_c(PHASE_COLOURS["P"]), lw=1.0, label="P"
-            )
-            ax_p.plot(
-                t, probability[col, 1], color=_c(PHASE_COLOURS["S"]), lw=1.0, label="S"
-            )
-            ax_p.set_ylim(0, 1.05)
-            ax_p.set_xlabel("time (s)")
-            if col:
-                ax_p.set_yticklabels([])
-        axes[1, 0].set_ylabel("probability")
-        axes[1, 0].legend(fontsize=8, loc="upper left")
-        axes[0, 0].set_title("dotted: analyst, dashed: model", fontsize=8, loc="left")
-    return _done(fig)
-
-
-def plot_pick_residuals(
-    residual_p, residual_s, summary_p, summary_s, limit: float = 1.0
-):
-    """Histograms of predicted minus analyst pick time for P and S."""
+    ``residuals`` maps a model name to its ``(residual_p, residual_s)``; the first
+    model is drawn filled, the others as outlines. Errors beyond ``limit`` pile up in
+    the end bins, so the tail stays visible instead of being cut off.
+    """
     import matplotlib.pyplot as plt
 
     bins = np.linspace(-limit, limit, 41)
     with plt.style.context(style("open")):
-        fig, axes = plt.subplots(1, 2, figsize=(9.0, 3.2), sharey=True)
-        for ax, name, residual, summary in zip(
-            axes,
-            ("P", "S"),
-            (residual_p, residual_s),
-            (summary_p, summary_s),
-            strict=True,
-        ):
-            residual = np.asarray(residual)
-            ax.hist(
-                np.clip(residual, -limit, limit),
-                bins=bins,
-                color=_c(PHASE_COLOURS[name]),
+        fig, axes = plt.subplots(1, 2, figsize=(9.0, 3.4), sharey=True)
+        for column, (ax, name) in enumerate(zip(axes, ("P", "S"), strict=True)):
+            for k, (model, pair) in enumerate(residuals.items()):
+                values = np.clip(np.asarray(pair[column], dtype=float), -limit, limit)
+                if k == 0:
+                    ax.hist(
+                        values,
+                        bins=bins,
+                        color=_c(PHASE_COLOURS[name]),
+                        label=model,
+                    )
+                else:
+                    ax.hist(
+                        values,
+                        bins=bins,
+                        histtype="step",
+                        color=_c("C6"),
+                        lw=2.2,
+                        label=model,
+                    )
+            ax.axvline(0, color=_c("k"), lw=1.4)
+            ax.set_yscale("log")
+            ax.set_ylim(bottom=0.7)
+            ax.set_xlabel(
+                f"{name} pick: predicted - analyst (s, clipped at \u00b1{limit:g})"
             )
-            ax.axvline(0, color="k", lw=0.8)
-            ax.set_xlabel(f"{name} pick: predicted - analyst (s, clipped at {limit:g})")
-            ax.set_title(
-                f"median |error| {summary['median_abs']:.2f} s,"
-                f" bias {summary['bias']:+.2f} s,"
-                f" miss {100 * summary['miss_rate']:.0f}%",
-                fontsize=8,
-            )
-        axes[0].set_ylabel("traces")
+        axes[0].set_ylabel("traces (log scale)")
+        if len(residuals) > 1:
+            axes[1].legend(fontsize=8, loc="upper right")
     return _done(fig)
 
 
@@ -971,8 +921,8 @@ def plot_residual_trends(snr, distance_km, residual_p, residual_s):
                 ax.scatter(
                     np.asarray(x)[ok],
                     np.abs(residual[ok]) + 1e-3,
-                    s=6,
-                    alpha=0.5,
+                    s=12,
+                    alpha=0.7,
                     color=_c(PHASE_COLOURS[name]),
                     label=name,
                     edgecolors="none",
@@ -985,50 +935,102 @@ def plot_residual_trends(snr, distance_km, residual_p, residual_s):
     return _done(fig)
 
 
-def plot_handoff(scene, m_true, sigmas, seed: int = 0):
-    """One earthquake located from simulated P picks of different quality.
+SPLIT_COLOURS = ("C0", "C3", "C1")  # train, validation, test
+SPLIT_NAMES = ("train", "validation", "test")
 
-    One map per pick error in ``sigmas`` (s): the grid posterior of Part 1c (flat
-    prior) for the scene's stations, with one noise draw scaled to each ``sigma``."""
+
+def plot_split_by_event(data, n_events: int = 14, seed: int = 0):
+    """The same traces dealt to train / validation / test two ways, one row per event.
+
+    Left: whole traces dealt at random (the split we do not use): most events end up
+    in several sets. Right: whole events (the split we use): every row is one colour.
+    ``data`` is a ``PickerData``.
+    """
     import matplotlib.pyplot as plt
-    import torch
+    from matplotlib.patches import Patch
 
-    from . import physics
-    from .density_plotting import _zoom
-    from .geometry import BOX
-    from .plotting import map_axes, plot_stations
-    from .posterior import grid_posterior
+    from . import waveform_metrics as metrics
 
-    m_true = torch.as_tensor(m_true, dtype=torch.float64)
-    with plt.style.context(style("boxed")):
-        fig, axes = plt.subplots(
-            1, len(sigmas), figsize=(9.0, 3.6), layout="constrained", squeeze=False
+    event, split = np.asarray(data.event_id), _numpy(data.split)
+    draw = metrics.random_trace_split(len(event), seed=seed)
+    leak = metrics.trace_split_leak(event, draw)
+    ids, counts = np.unique(event, return_counts=True)
+    rng = np.random.default_rng(seed)
+    pool = ids[counts >= 5]
+    chosen = rng.choice(pool, size=min(n_events, len(pool)), replace=False)
+    size = dict(zip(ids, counts, strict=True))
+    chosen = sorted(chosen, key=lambda e: -size[e])
+    width = max(size[e] for e in chosen)
+    with plt.style.context(style("open")):
+        fig, axes = plt.subplots(1, 2, figsize=(9.0, 3.9), sharey=True)
+        leak_note = f"{100 * leak:.0f}% of test traces have a sibling in training"
+        for ax, assignment, title in (
+            (axes[0], draw, f"split by trace\n{leak_note}"),
+            (axes[1], split, "split by earthquake\nno test trace does"),
+        ):
+            for row, e in enumerate(chosen):
+                members = np.flatnonzero(event == e)
+                ax.scatter(
+                    np.arange(len(members)),
+                    np.full(len(members), row),
+                    s=90,
+                    marker="s",
+                    c=[_c(SPLIT_COLOURS[k]) for k in assignment[members]],
+                    edgecolors="none",
+                )
+            ax.set_title(title, fontsize=10)
+            ax.set_xlabel("traces of the earthquake")
+            ax.set_xticks([])
+            ax.set_xlim(-0.7, width - 0.3)
+            ax.set_ylim(len(chosen) - 0.4, -0.8)
+        axes[0].set_ylabel("earthquakes, one row each")
+        axes[0].set_yticks([])
+        axes[1].legend(
+            handles=[
+                Patch(color=_c(c), label=n)
+                for c, n in zip(SPLIT_COLOURS, SPLIT_NAMES, strict=True)
+            ],
+            loc="lower right",
+            fontsize=9,
+            frameon=False,
         )
-        for ax, sigma in zip(axes[0], sigmas, strict=True):
-            torch.manual_seed(seed)
-            d = physics.observe(scene.F, m_true[None], sigma, scene.live)[0]
-            post = grid_posterior(scene.F, d, sigma, None, scene.live)
-            density = post.density.numpy()
-            nodes = np.linspace(0, BOX, density.shape[0])
-            ax.contourf(
-                nodes, nodes, density / density.max(), levels=np.linspace(0.02, 1, 12),
-                cmap="Reds", alpha=0.9,
-            )  # fmt: skip
-            if post.level_68 < density.max():  # 1 km grid: a sharp posterior is a dot
-                ax.contour(
-                    nodes, nodes, density, levels=[post.level_68],
-                    colors=[_c("C1")], linewidths=1.4,
-                )  # fmt: skip
-            plot_stations(ax, scene.xi_x, scene.xi_y, s=40)
-            ax.plot(*m_true, "*", mfc="white", mec="k", ms=13, mew=1.1, zorder=6)
-            map_axes(ax)
-            ax.set_title(f"pick error {sigma:.2f} s")
-            area = float((post.density >= post.level_68).sum())  # 1 km cells
-            ax.text(
-                0.03, 0.04, f"68% region: {area:.0f} km$^2$", transform=ax.transAxes,
-                fontsize=8, zorder=9,
-            )  # fmt: skip
-            _zoom(ax, m_true[None].numpy(), pad=22.0)
-            ax.set_ylabel("")
-        axes[0, 0].set_ylabel("y (km)")
+    return _done(fig)
+
+
+def plot_pick_scatter(picks, p, s, sampling_rate: float = 100.0):
+    """Model pick time against analyst pick time: P, S and the S - P time.
+
+    ``picks`` is ``(B, 2)`` sample indices (-1: missed); ``p`` and ``s`` are the analyst
+    samples. Points on the diagonal agree; the S - P panel is what a locator needs.
+    """
+    import matplotlib.pyplot as plt
+
+    picks = np.asarray(picks, dtype=float)
+    truth = np.stack([_numpy(p), _numpy(s)], axis=1) / sampling_rate
+    found = picks >= 0
+    model = np.where(found, picks / sampling_rate, np.nan)
+    both = found.all(axis=1)
+    panels = (
+        ("P pick", truth[:, 0], model[:, 0], PHASE_COLOURS["P"], found[:, 0]),
+        ("S pick", truth[:, 1], model[:, 1], PHASE_COLOURS["S"], found[:, 1]),
+        (
+            "S - P time",
+            truth[:, 1] - truth[:, 0],
+            model[:, 1] - model[:, 0],
+            "C6",
+            both,
+        ),
+    )
+    with plt.style.context(style("open")):
+        fig, axes = plt.subplots(1, 3, figsize=(9.0, 3.3))
+        for ax, (name, x, y, colour, ok) in zip(axes, panels, strict=True):
+            lo, hi = np.nanmin(x[ok]), np.nanmax(x[ok])
+            ax.plot([lo, hi], [lo, hi], color=_c("k"), lw=1.4)
+            ax.scatter(
+                x[ok], y[ok], s=12, alpha=0.7, color=_c(colour), edgecolors="none"
+            )
+            ax.set_xlabel(f"analyst {name} (s)")
+            ax.set_title(f"{int((~ok).sum())} missed", fontsize=8, loc="right")
+            ax.set_aspect("equal", adjustable="datalim")
+        axes[0].set_ylabel("model (s)")
     return _done(fig)

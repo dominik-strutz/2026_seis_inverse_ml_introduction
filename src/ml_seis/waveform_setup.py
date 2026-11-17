@@ -100,23 +100,26 @@ def shape_card(mo, rows, receptive_samples, sampling_rate):
     )
 
 
-def settings_card(mo, settings: dict):
-    """Resolved training configuration as one compact line."""
-    text = ", ".join(f"{k} = `{v}`" for k, v in settings.items())
-    return mo.md(f"**Configuration:** {text}")
+def pick_card(mo, summaries: dict):
+    """Pick-error summary at the chosen threshold, one row per network and phase.
 
+    ``summaries`` maps a network's name to its ``(summary_p, summary_s)``.
+    """
 
-def pick_card(mo, summary_p: dict, summary_s: dict):
-    """Pick-error summary for P and S at the chosen threshold."""
-
-    def row(name, s):
+    def row(network, phase, s):
         return (
-            f"| {name} | {s['median_abs']:.2f} | {s['bias']:+.2f} | {s['rms']:.2f} "
-            f"| {100 * s['within_0.1']:.0f}% | {100 * s['within_0.25']:.0f}% "
-            f"| {100 * s['within_0.5']:.0f}% | {100 * s['miss_rate']:.0f}% |"
+            f"| {network} | {phase} | {s['median_abs']:.2f} | {s['bias']:+.2f} "
+            f"| {s['rms']:.2f} | {100 * s['within_0.1']:.0f}% "
+            f"| {100 * s['within_0.25']:.0f}% | {100 * s['within_0.5']:.0f}% "
+            f"| {100 * s['miss_rate']:.0f}% |"
         )
 
-    header = "| phase | median abs (s) | bias (s) | rms (s) |"
+    header = "| network | phase | median abs (s) | bias (s) | rms (s) |"
     header += " <0.1 s | <0.25 s | <0.5 s | missed |"
-    rule = "| --- |" + " ---: |" * 7
-    return mo.md("\n".join([header, rule, row("P", summary_p), row("S", summary_s)]))
+    rule = "| --- | --- |" + " ---: |" * 7
+    rows = [
+        row(name, phase, summary)
+        for name, pair in summaries.items()
+        for phase, summary in zip(("P", "S"), pair, strict=True)
+    ]
+    return mo.md("\n".join([header, rule, *rows]))

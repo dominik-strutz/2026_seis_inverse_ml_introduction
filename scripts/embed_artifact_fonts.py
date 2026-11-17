@@ -74,7 +74,7 @@ BASIC = set(range(0x20, 0x7F)) | {0xB7, 0xD7, 0x2212}
 MATH_EXTRA = (
     set(range(0x1D434, 0x1D468))  # italic Latin
     | set(range(0x1D6E2, 0x1D71C))  # italic Greek
-    | {0x1D4A9}  # script N
+    | {0x1D4A9, 0x210E}  # script N, italic h (the one hole of the italic block)
     | set(range(0x1D7CE, 0x1D7D8))  # bold digits
     | set(range(0x370, 0x400))
     | set(range(0x2200, 0x2300))  # operators

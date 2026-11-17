@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import numpy as np
-from scipy import signal
 
 
 def confusion_matrix(y_true, y_pred, n_classes: int) -> np.ndarray:
@@ -285,28 +284,60 @@ def amplitude_spectrum(x, sampling_rate: float):
     return np.fft.rfftfreq(len(x), 1.0 / sampling_rate), a / a.max()
 
 
-def log_spectrogram(
-    x, sampling_rate: float, window: int = 128, hop: int = 16, pad: int = 1
-):
-    """Log-power spectrogram of one record: ``(spec, freq, time)`` with ``spec`` of
-    shape ``(freq, time)`` in dB relative to its maximum, floored at -60 dB.
+SPEC_WINDOW = 128  # samples in one spectrogram window: 2.6 s at 50 Hz
+SPEC_HOP = 25  # samples the window slides per time bin: 0.5 s
+SPEC_BINS = 32  # frequencies kept before pooling: 0.4 to 12.5 Hz
+SPEC_POOL = 2  # neighbouring frequencies averaged into one row
 
-    ``scipy.signal.spectrogram`` with ObsPy's choices (``obspy.imaging.spectrogram``):
-    a Hann window of ``window`` samples (128), zero-padded to ``pad * window`` points
-    (``pad=1``: none, so one value per cell; ObsPy pads 8x), and 10 log10 of the power.
-    Each segment also has its mean removed, so an offset does not leak into low bins."""
-    freq, time, power = signal.spectrogram(
-        np.asarray(x, dtype=np.float64),
-        fs=sampling_rate,
-        window="hann",
-        nperseg=window,
-        noverlap=window - hop,
-        nfft=pad * window,
-        detrend="constant",
-        mode="psd",
+
+def spectrogram(
+    u,
+    window: int = SPEC_WINDOW,
+    hop: int = SPEC_HOP,
+    bins: int = SPEC_BINS,
+    pool: int = SPEC_POOL,
+):
+    """Power spectrogram in decibels of ``u`` (batch, samples): the one recipe of the
+    widget and of the training target of 2c.
+
+    ObsPy's recipe without the zero padding: the mean of the record is removed, a
+    Hann window of ``window`` samples slides by ``hop``, the power of the first
+    ``bins`` frequencies after the zero frequency is kept (0.4 to 12.5 Hz at 50 Hz),
+    and every ``pool`` neighbouring frequencies are averaged (as power, before the
+    logarithm: this lowers the speckle of a plain periodogram) into one row. No window
+    reaches past the record. Returns ``(batch, bins // pool, time bin)``, row 0 the
+    lowest frequency; ``spectrogram_axes`` gives the frequency and time of the cells."""
+    import torch
+
+    u = torch.as_tensor(u, dtype=torch.float64)
+    u = u - u.mean(-1, keepdim=True)
+    spectrum = torch.stft(
+        u,
+        window,
+        hop,
+        center=False,
+        window=torch.hann_window(window, periodic=False),
+        return_complex=True,
     )
-    db = 10.0 * np.log10(power / (power.max() + 1e-24) + 1e-12)
-    return np.maximum(db, -60.0), freq, time
+    power = spectrum[:, 1 : 1 + bins].abs() ** 2
+    power = power.reshape(len(u), bins // pool, pool, -1).mean(dim=2)
+    return (10 * torch.log10(power + 1e-12)).float()
+
+
+def spectrogram_axes(
+    n_samples: int,
+    sampling_rate: float,
+    window: int = SPEC_WINDOW,
+    hop: int = SPEC_HOP,
+    bins: int = SPEC_BINS,
+    pool: int = SPEC_POOL,
+):
+    """Where the cells of ``spectrogram`` lie: ``(freq, time)``, the centres (Hz, s)
+    of its rows and of its time bins for records of ``n_samples``."""
+    df = sampling_rate / window
+    freq = (np.arange(bins // pool) * pool + (pool + 1) / 2) * df
+    n_time = (n_samples - window) // hop + 1
+    return freq, (np.arange(n_time) * hop + window / 2) / sampling_rate
 
 
 def length_baseline(n_live_train, label_train, n_live_test, edges, n_classes: int):
@@ -352,3 +383,28 @@ def fill_tail(u, n_live, kind: str = "band", sampling_rate: float = 50.0, seed=0
     elif kind != "white":
         raise ValueError(kind)
     return torch.where(tail, noise * spread[:, None], x)[:, None]
+
+
+def random_trace_split(
+    n: int, fractions=(0.7, 0.15, 0.15), seed: int = 0
+) -> np.ndarray:
+    """Deal ``n`` traces at random to train (0), validation (1) and test (2).
+
+    This is the split the course does **not** use: it ignores which earthquake a
+    trace belongs to. It exists to show what such a split would leak.
+    """
+    return np.random.default_rng(seed).choice(3, size=n, p=list(fractions))
+
+
+def trace_split_leak(event_id, assignment) -> float:
+    """Share of the test traces whose earthquake also has a trace in training.
+
+    ``assignment`` holds 0 (train), 1 (validation) or 2 (test) for every trace. Under a
+    split by earthquake the answer is 0 by construction.
+    """
+    event_id, assignment = np.asarray(event_id), np.asarray(assignment)
+    train_events = set(event_id[assignment == 0].tolist())
+    test = event_id[assignment == 2]
+    if len(test) == 0:
+        return 0.0
+    return float(np.mean([e in train_events for e in test.tolist()]))
