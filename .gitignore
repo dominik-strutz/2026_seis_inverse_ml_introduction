@@ -40,12 +40,3 @@ solutions/*
 
 # Personal lecture notes of the maintainer -- local only, not for agents
 notes/
-
-# Part 2d (waveforms): local only for now, not published (2a, 2b and 2c are
-# published, without a snapshot: they need the downloaded Llaima data)
-lectures/2_d_picking_phases.py
-lectures/layouts/2_d_picking_phases.slides.json
-src/ml_seis/artifacts/strided_conv.html
-src/ml_seis/artifacts/phasenet_architecture.html
-src/ml_seis/artifacts/pick_loss.html
-src/ml_seis/artifacts/course_pipeline.html
